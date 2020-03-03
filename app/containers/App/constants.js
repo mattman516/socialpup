@@ -11,3 +11,4 @@
 
 export const SET_LOGIN = 'auth/SET_LOGIN';
 export const SET_LOGOUT = 'auth/SET_LOGOUT';
+export const CREATE_USER = 'auth/CREATE_USER';

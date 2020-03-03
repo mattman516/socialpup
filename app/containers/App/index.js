@@ -7,7 +7,9 @@ import Amplify from 'aws-amplify';
 import aws_exports from '../../aws-exports';
 import MapPage from '../MapPage';
 import { makeSelectAuthState } from './selectors';
-import { setLogin, setLogout } from './actions';
+import { setLogin, setLogout, createUser } from './actions';
+import { useInjectSaga } from 'utils/injectSaga';
+import saga from './saga';
 
 Amplify.configure(aws_exports);
 
@@ -56,12 +58,13 @@ const AuthComponent = props => {
   const [authState, setAuthState] = React.useState();
   const [redirect, setRedirect] = React.useState();
   const handleStateChange = (state, user) => {
-    console.log('STATE CHANGE');
+    console.log('STATE CHANGE', state, user);
     if (state === 'signedIn') {
       const params = queryString.parse(props.location.search);
       setRedirect(params.redirect);
       setAuthState(state);
       props.onUserSignIn(user);
+      props.onUserSignUp(user);
     } else if (state === 'signIn') {
       props.onUserSignOut();
     }
@@ -92,6 +95,7 @@ const Routes = ({ childProps }) => (
 
 const App = () => {
   const authState = useSelector(makeSelectAuthState());
+  useInjectSaga({ key: 'app', saga });
   const dispatch = useDispatch();
 
   const handleUserSignIn = user => {
@@ -102,11 +106,16 @@ const App = () => {
   const handleUserSignOut = () => {
     dispatch(setLogout());
   };
+  const handleUserSignUp = (user) => {
+    console.log('HANDLEUSERSIGNUP', user);
+    dispatch(createUser(user));
+  };
 
   const childProps = {
     isLoggedIn: authState.loggedIn,
     onUserSignIn: handleUserSignIn,
     onUserSignOut: handleUserSignOut,
+    onUserSignUp: handleUserSignUp
   };
 
   return (

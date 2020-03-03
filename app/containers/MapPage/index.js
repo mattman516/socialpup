@@ -15,6 +15,7 @@ import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import { setWalk, fetchWalks, deleteWalk } from './actions';
+import AddFollowers from '../AddFollowers';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import saga from './saga';
 import reducer from './reducer';
@@ -60,6 +61,7 @@ export default function MapPage() {
   const handleMapClick = clickE => {
     setModalOpen(true);
     setWalkEvent({
+      walkEnds: getDate(30),
       latitude: `${clickE.lngLat[1]}`,
       longitude: `${clickE.lngLat[0]}`,
     });
@@ -77,10 +79,9 @@ export default function MapPage() {
     dispatch(deleteWalk(walk));
   };
   const handleFormChange = e => {
+    console.log('WALKENDS', e);
     if (e.target.id === 'walktime') {
-      const walkEnds = moment(new Date())
-        .add(e.target.value, 'm')
-        .toDate();
+      const walkEnds = getDate(e.target.value);
       setWalkEvent({
         ...walkEvent,
         walkEnds,
@@ -97,9 +98,13 @@ export default function MapPage() {
           content="Feature page of React.js Boilerplate application"
         />
       </Helmet>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }} >
+
       <Button type="button" onClick={handleSetCurrentLocation}>
         my location
       </Button>
+      <AddFollowers/>
+      </div>
       <ReactMapGL
         {...viewport}
         latitude={latitude}
@@ -133,7 +138,7 @@ export default function MapPage() {
         <Modal.Header>Create Walk</Modal.Header>
         <Modal.Body>
           <Form onChange={handleFormChange}>
-            <Form.Control id="walktime" as="select" defaultValue={10}>
+            <Form.Control id="walktime" as="select" defaultValue={30}>
               {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
                 <option value={val}>{val}</option>
               ))}
@@ -152,3 +157,7 @@ export default function MapPage() {
     </div>
   );
 }
+
+const getDate = (timeAdd) => (moment(new Date())
+  .add(timeAdd, 'm')
+  .format('X'));

@@ -1,20 +1,20 @@
 {
-  "dev": {
-    "awscloudformation": {
-      "AuthRoleName": "amplify-social-pup-dev-150040-authRole",
-      "UnauthRoleArn": "arn:aws:iam::172885992056:role/amplify-social-pup-dev-150040-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::172885992056:role/amplify-social-pup-dev-150040-authRole",
-      "Region": "us-east-1",
-      "DeploymentBucketName": "amplify-social-pup-dev-150040-deployment",
-      "UnauthRoleName": "amplify-social-pup-dev-150040-unauthRole",
-      "StackName": "amplify-social-pup-dev-150040",
-      "StackId": "arn:aws:cloudformation:us-east-1:172885992056:stack/amplify-social-pup-dev-150040/2a8bf520-5b2e-11ea-9dc7-0a803f1342f3",
-      "AmplifyAppId": "d17y7hvy69t9as"
-    },
-    "categories": {
-      "auth": {
-        "socialpup0d32b3f8": {}
-      }
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-social-pup-dev-150040-authRole",
+            "UnauthRoleArn": "arn:aws:iam::172885992056:role/amplify-social-pup-dev-150040-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::172885992056:role/amplify-social-pup-dev-150040-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-social-pup-dev-150040-deployment",
+            "UnauthRoleName": "amplify-social-pup-dev-150040-unauthRole",
+            "StackName": "amplify-social-pup-dev-150040",
+            "StackId": "arn:aws:cloudformation:us-east-1:172885992056:stack/amplify-social-pup-dev-150040/2a8bf520-5b2e-11ea-9dc7-0a803f1342f3",
+            "AmplifyAppId": "d17y7hvy69t9as"
+        },
+        "categories": {
+            "auth": {
+                "socialpup0d32b3f8": {}
+            }
+        }
     }
-  }
 }

@@ -1,5 +1,5 @@
 type Walk @model
-  @key(name: "endTime", fields: ["walkEnds"])
+  @key(name: "endTime", fields: ["owner", "walkEnds"])
   @auth(
     rules: [
       {allow: owner, operations: [create, update, delete]}
@@ -7,7 +7,7 @@ type Walk @model
   )
   {
     id: ID!
-    walkEnds: AWSDateTime!
+    walkEnds: Int!
     publicity: String
     name: String!
     description: String

@@ -15,7 +15,7 @@
  *    }
  */
 
-import { SET_LOGIN, SET_LOGOUT } from './constants';
+import { SET_LOGIN, SET_LOGOUT, CREATE_USER } from './constants';
 
 /**
  * Load the repositories, this action starts the request saga
@@ -31,5 +31,11 @@ export function setLogin(user) {
 export function setLogout() {
   return {
     type: SET_LOGOUT,
+  };
+}
+export function createUser(user) {
+  return {
+    type: CREATE_USER,
+    data: user
   };
 }

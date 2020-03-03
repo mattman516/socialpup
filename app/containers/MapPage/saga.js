@@ -13,7 +13,6 @@ export function* processSaveWalk(action) {
 
   if (authState.userData.attributes.sub) {
     walk = {
-      walkEnds: new Date(),
       name: 'test123',
       description: 'test123',
       ...action.data,
