@@ -9,6 +9,15 @@ const selectGlobal = state => state.global || initialState;
 
 const selectRouter = state => state.router;
 
+export const makeSelectAuthState = () =>
+  createSelector(
+    selectGlobal,
+    globalState => ({
+      loggedIn: globalState.loggedIn,
+      userData: globalState.userData,
+    }),
+  );
+
 const makeSelectCurrentUser = () =>
   createSelector(
     selectGlobal,

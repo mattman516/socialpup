@@ -1,0 +1,30 @@
+type Walk @model
+  @key(name: "endTime", fields: ["walkEnds"])
+  @auth(
+    rules: [
+      {allow: owner, operations: [create, update, delete]}
+    ]
+  )
+  {
+    id: ID!
+    walkEnds: AWSDateTime!
+    publicity: String
+    name: String!
+    description: String
+    latitude: String
+    longitude: String
+    owner: String
+  }
+
+type UserInfo @model
+  @auth(
+    rules: [
+      {allow: owner, operations: [create, update, delete]}
+    ]
+  )
+  {
+    id: ID!
+    publicity: String
+    following: [ID]
+    owner: String
+  }

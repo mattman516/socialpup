@@ -1,50 +1,121 @@
-/**
- *
- * App
- *
- * This component is the skeleton around the actual pages, and should only
- * contain code that should be seen on all pages. (e.g. navigation bar)
- */
-
 import React from 'react';
-import { Helmet } from 'react-helmet';
-import styled from 'styled-components';
-import { Switch, Route } from 'react-router-dom';
+import { Link, Switch, Route, Redirect } from 'react-router-dom';
+import { Authenticator } from 'aws-amplify-react';
+import queryString from 'query-string';
+import { useSelector, useDispatch } from 'react-redux';
+import Amplify from 'aws-amplify';
+import aws_exports from '../../aws-exports';
+import MapPage from '../MapPage';
+import { makeSelectAuthState } from './selectors';
+import { setLogin, setLogout } from './actions';
 
-import HomePage from 'containers/HomePage/Loadable';
-import FeaturePage from 'containers/FeaturePage/Loadable';
-import NotFoundPage from 'containers/NotFoundPage/Loadable';
-import Header from 'components/Header';
-import Footer from 'components/Footer';
+Amplify.configure(aws_exports);
 
-import GlobalStyle from '../../global-styles';
+const HeaderLinks = ({ authState }) => (
+  <div
+    style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignContent: 'center',
+      padding: 30,
+    }}
+  >
+    <Link to="/" style={{ textDecoration: 'none' }}>
+      Social Pups
+    </Link>
+    <Link to="/auth">
+      {authState.loggedIn
+        ? `${authState.userData.username} is logged in`
+        : 'Not Logged In'}
+    </Link>
+  </div>
+);
 
-const AppWrapper = styled.div`
-  max-width: calc(768px + 16px * 2);
-  margin: 0 auto;
-  display: flex;
-  min-height: 100%;
-  padding: 0 16px;
-  flex-direction: column;
-`;
+const ProtectedRoute = ({ render: C, props: childProps, ...rest }) => (
+  <Route
+    {...rest}
+    render={rProps =>
+      childProps.isLoggedIn ? (
+        <C {...rProps} {...childProps} />
+      ) : (
+        <Redirect
+          to={`/auth?redirect=${rProps.location.pathname}${
+            rProps.location.search
+          }`}
+        />
+      )
+    }
+  />
+);
 
-export default function App() {
+const ProppedRoute = ({ render: C, props: childProps, ...rest }) => (
+  <Route {...rest} render={rProps => <C {...rProps} {...childProps} />} />
+);
+
+const AuthComponent = props => {
+  const [authState, setAuthState] = React.useState();
+  const [redirect, setRedirect] = React.useState();
+  const handleStateChange = (state, user) => {
+    console.log('STATE CHANGE');
+    if (state === 'signedIn') {
+      const params = queryString.parse(props.location.search);
+      setRedirect(params.redirect);
+      setAuthState(state);
+      props.onUserSignIn(user);
+    } else if (state === 'signIn') {
+      props.onUserSignOut();
+    }
+  };
   return (
-    <AppWrapper>
-      <Helmet
-        titleTemplate="%s - React.js Boilerplate"
-        defaultTitle="React.js Boilerplate"
-      >
-        <meta name="description" content="A React.js Boilerplate application" />
-      </Helmet>
-      <Header />
-      <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route path="/features" component={FeaturePage} />
-        <Route path="" component={NotFoundPage} />
-      </Switch>
-      <Footer />
-      <GlobalStyle />
-    </AppWrapper>
+    <div>
+      {authState === 'signedIn' && redirect ? (
+        <Redirect to={redirect} />
+      ) : (
+        <Authenticator onStateChange={handleStateChange} />
+      )}
+    </div>
   );
-}
+};
+
+const Routes = ({ childProps }) => (
+  <Switch>
+    <ProppedRoute
+      exact
+      path="/auth"
+      render={AuthComponent}
+      props={childProps}
+    />
+    <ProtectedRoute exact path="/" render={MapPage} props={childProps} />
+    <Route exact path="/about" render={() => <div>About Content</div>} />
+  </Switch>
+);
+
+const App = () => {
+  const authState = useSelector(makeSelectAuthState());
+  const dispatch = useDispatch();
+
+  const handleUserSignIn = user => {
+    console.log('SIGNIN');
+    dispatch(setLogin(user));
+  };
+
+  const handleUserSignOut = () => {
+    dispatch(setLogout());
+  };
+
+  const childProps = {
+    isLoggedIn: authState.loggedIn,
+    onUserSignIn: handleUserSignIn,
+    onUserSignOut: handleUserSignOut,
+  };
+
+  return (
+    <div className="App">
+      <HeaderLinks {...{ authState }} />
+      <br />
+      <Routes childProps={childProps} />
+    </div>
+  );
+};
+
+export default App;

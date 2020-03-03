@@ -8,28 +8,20 @@
  */
 
 import produce from 'immer';
-import { SET_LOGIN, SET_LOGOUT } from './constants';
+import { SET_WALK_LIST } from './constants';
 
 // The initial state of the App
 export const initialState = {
-  loading: false,
-  error: false,
-  currentUser: false,
-  loggedIn: false,
-  userData: {},
+  walkList: [],
 };
 
 /* eslint-disable default-case, no-param-reassign */
 const appReducer = (state = initialState, action) =>
   produce(state, draft => {
     switch (action.type) {
-      case SET_LOGIN:
-        draft.loggedIn = true;
-        draft.userData = action.data;
-        break;
-      case SET_LOGOUT:
-        draft.loggedIn = false;
-        draft.userData = {};
+      case SET_WALK_LIST:
+        console.log('REDUCER SET WALK LIST', action.data);
+        draft.walkList = action.data;
         break;
     }
   });
