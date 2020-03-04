@@ -1,3 +1,3 @@
-
-export const FETCH_USER = 'followers/FETCH_USER';
-export const SAVE_USER = 'followers/SAVE_USER';
+export const SET_USER_LIST = 'followers/SET_USER_LIST';
+export const FETCH_USER_LIST = 'followers/FETCH_USER_LIST';
+export const ADD_FOLLOWER = 'followers/ADD_FOLLOWER';

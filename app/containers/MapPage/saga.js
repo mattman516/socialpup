@@ -11,7 +11,7 @@ export function* processSaveWalk(action) {
   let walk = {};
   console.log('WALK', action);
 
-  if (authState.userData.attributes.sub) {
+  if (authState.authUserData.attributes.sub) {
     walk = {
       name: 'test123',
       description: 'test123',
@@ -50,10 +50,10 @@ export function* processFetchWalks() {
   let mappedWalkList = [];
   const authState = yield select(makeSelectAuthState());
   console.log(authState);
-  if (authState.userData.username) {
+  if (authState.authUserData.username) {
     walkList = yield API.graphql(
       graphqlOperation(listWalks, {
-        filter: { owner: { eq: authState.userData.username } },
+        filter: { owner: { eq: authState.authUserData.username } },
       }),
     );
     mappedWalkList = walkList.data.listWalks.items.map(walk => ({

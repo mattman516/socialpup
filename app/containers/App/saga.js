@@ -4,6 +4,7 @@ import { makeSelectAuthState } from '../App/selectors';
 import { getUserInfo } from '../../../src/graphql/queries';
 import { CREATE_USER } from './constants';
 import { createUserInfo } from '../../../src/graphql/mutations';
+import { setCurrentUser } from './actions';
 
 export function* processUserCreate(action) {
   console.log('USER CREATE START', action);
@@ -13,17 +14,19 @@ export function* processUserCreate(action) {
     following: [],
     owner: action.data.username,
   }
-  const testUser = yield API.graphql(
+  let foundUser = yield API.graphql(
     graphqlOperation(getUserInfo, { id: action.data.attributes.sub }),
   );
-  console.log('TESTUSER', testUser.data.getUserInfo);
-  if (!testUser.data.getUserInfo) {
+  foundUser = foundUser.data.getUserInfo;
+  if (!foundUser) {
     console.log('createuserinfo');
-    const currUser = yield API.graphql(
+    foundUser = yield API.graphql(
       graphqlOperation(createUserInfo, { input: initUser }),
     );
-    console.log('USER CREATE SUCCESS', currUser);
+    foundUser = foundUser.data.getUserInfo;
+    console.log('USER CREATE SUCCESS', foundUser);
   }
+  yield put(setCurrentUser(foundUser))
 }
 
 function* appSaga() {

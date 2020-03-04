@@ -98,12 +98,12 @@ export default function MapPage() {
           content="Feature page of React.js Boilerplate application"
         />
       </Helmet>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }} >
+      <div style={{ display: 'flex', justifyContent: 'space-between', margin: 30, marginTop: 0 }} >
 
-      <Button type="button" onClick={handleSetCurrentLocation}>
-        my location
-      </Button>
-      <AddFollowers/>
+        <Button type="button" onClick={handleSetCurrentLocation}>
+          my location
+        </Button>
+        <AddFollowers/>
       </div>
       <ReactMapGL
         {...viewport}
@@ -140,7 +140,7 @@ export default function MapPage() {
           <Form onChange={handleFormChange}>
             <Form.Control id="walktime" as="select" defaultValue={30}>
               {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
-                <option value={val}>{val}</option>
+                <option key={val} value={val}>{val}</option>
               ))}
             </Form.Control>
           </Form>

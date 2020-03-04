@@ -27,7 +27,7 @@ const HeaderLinks = ({ authState }) => (
     </Link>
     <Link to="/auth">
       {authState.loggedIn
-        ? `${authState.userData.username} is logged in`
+        ? `${authState.authUserData.username} is logged in`
         : 'Not Logged In'}
     </Link>
   </div>
