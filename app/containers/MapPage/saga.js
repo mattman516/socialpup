@@ -2,7 +2,7 @@ import { put, select, takeLatest } from 'redux-saga/effects';
 import { API, graphqlOperation } from 'aws-amplify';
 import { makeSelectAuthState } from '../App/selectors';
 import { createWalk, deleteWalk } from '../../../src/graphql/mutations';
-import { listWalks } from '../../../src/graphql/queries';
+import { getWalkByOwner } from '../../../src/GSIGraphql';
 import { SET_WALK, FETCH_WALKS, DELETE_WALK } from './constants';
 import { setWalkList, fetchWalks } from './actions';
 
@@ -52,11 +52,9 @@ export function* processFetchWalks() {
   console.log(authState);
   if (authState.authUserData.username) {
     walkList = yield API.graphql(
-      graphqlOperation(listWalks, {
-        filter: { owner: { eq: authState.authUserData.username } },
-      }),
+      graphqlOperation(getWalkByOwner, {owner: authState.authUserData.username}),
     );
-    mappedWalkList = walkList.data.listWalks.items.map(walk => ({
+    mappedWalkList = walkList.data.ownerEndTime.items.map(walk => ({
       ...walk,
       latitude: parseFloat(walk.latitude),
       longitude: parseFloat(walk.longitude),

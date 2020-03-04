@@ -1,15 +1,15 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import Button from 'react-bootstrap/Button';
+import FollowingUser from '../FollowingUser';
 
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
-import { fetchUser, fetchAllUsers, addFollower } from './actions';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { fetchAllUsers, addFollower } from './actions';
 import saga from './saga';
 import reducer from './reducer';
 import { makeSelectUserList } from './selectors';
-import { makeSelectAuthState, makeSelectCurrentUser } from '../App/selectors';
+import { makeSelectCurrentUser } from '../App/selectors';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 
@@ -39,6 +39,9 @@ export default function AddFollowers() {
     if (currentNewFollower) {
       dispatch(addFollower(currentNewFollower));
     }
+    handleClose();
+  }
+  const handleClose = () => {
     setModalOpen(false);
   }
 
@@ -47,7 +50,7 @@ export default function AddFollowers() {
       <Button type="button" onClick={handleButtonClick}>
         Following
       </Button>
-      <Modal show={modalOpen} onHide={() => setModalOpen(false)}>
+      <Modal show={modalOpen} onHide={handleClose}>
         <Modal.Header>Find Pup</Modal.Header>
         <Modal.Body>
           <Form onChange={handleFormChange}>
@@ -61,12 +64,12 @@ export default function AddFollowers() {
           <div>
             <h6>Already following:</h6>
             {(currentUser.following || []).map(u => (
-              <p>{u}</p>
+              <FollowingUser username={u} />
             ))}
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button type="button">
+          <Button type="button" onClick={handleClose}>
             Cancel
           </Button>
           <Button type="submit" onClick={handleSubmit}>

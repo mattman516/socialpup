@@ -63,3 +63,34 @@ export const listUserInfos = /* GraphQL */ `
     }
   }
 `;
+export const ownerEndTime = /* GraphQL */ `
+  query OwnerEndTime(
+    $owner: String
+    $walkEnds: ModelIntKeyConditionInput
+    $sortDirection: ModelSortDirection
+    $filter: ModelWalkFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    ownerEndTime(
+      owner: $owner
+      walkEnds: $walkEnds
+      sortDirection: $sortDirection
+      filter: $filter
+      limit: $limit
+      nextToken: $nextToken
+    ) {
+      items {
+        id
+        walkEnds
+        publicity
+        name
+        description
+        latitude
+        longitude
+        owner
+      }
+      nextToken
+    }
+  }
+`;
