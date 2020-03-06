@@ -8,8 +8,12 @@ import { Helmet } from 'react-helmet';
 import { useSelector, useDispatch } from 'react-redux';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 import moment from 'moment';
 import Form from 'react-bootstrap/Form';
+import { FaMapMarker, FaGlobe } from 'react-icons/fa';
+import { MdGpsFixed } from 'react-icons/md';
 
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
@@ -86,6 +90,11 @@ export default function MapPage() {
         ...walkEvent,
         walkEnds,
       });
+    } else if (e.target.id === 'walkname') {
+      setWalkEvent({
+        ...walkEvent,
+        name: e.target.value,
+      });
     }
   };
 
@@ -98,12 +107,22 @@ export default function MapPage() {
           content="Feature page of React.js Boilerplate application"
         />
       </Helmet>
-      <div style={{ display: 'flex', justifyContent: 'space-between', margin: 30, marginTop: 0 }} >
-
-        <Button type="button" onClick={handleSetCurrentLocation}>
-          my location
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          margin: 30,
+          marginTop: 0,
+        }}
+      >
+        <Button
+          type="button"
+          onClick={handleSetCurrentLocation}
+          style={{ display: 'flex', alignItems: 'center' }}
+        >
+          <FaGlobe /> Find Me
         </Button>
-        <AddFollowers/>
+        <AddFollowers />
       </div>
       <ReactMapGL
         {...viewport}
@@ -120,7 +139,7 @@ export default function MapPage() {
           offsetLeft={0}
           offsetTop={0}
         >
-          <div>curr</div>
+          <MdGpsFixed/>
         </Marker>
         {walkList.map(walk => (
           <Marker
@@ -130,7 +149,12 @@ export default function MapPage() {
             offsetLeft={0}
             offsetTop={0}
           >
-            <div onClick={handleDeleteWalk(walk)}>eyyy</div>
+            <OverlayTrigger
+              placement="top"
+              overlay={<Tooltip>{walk.name}</Tooltip>}
+            >
+              <FaMapMarker onClick={handleDeleteWalk(walk)} />
+            </OverlayTrigger>
           </Marker>
         ))}
       </ReactMapGL>
@@ -138,9 +162,16 @@ export default function MapPage() {
         <Modal.Header>Create Walk</Modal.Header>
         <Modal.Body>
           <Form onChange={handleFormChange}>
+            <Form.Control
+              id="walkname"
+              type="text"
+              placeholder="Where you going?"
+            />
             <Form.Control id="walktime" as="select" defaultValue={30}>
               {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
-                <option key={val} value={val}>{val}</option>
+                <option key={val} value={val}>
+                  {val}
+                </option>
               ))}
             </Form.Control>
           </Form>
@@ -158,6 +189,7 @@ export default function MapPage() {
   );
 }
 
-const getDate = (timeAdd) => (moment(new Date())
-  .add(timeAdd, 'm')
-  .format('X'));
+const getDate = timeAdd =>
+  moment(new Date())
+    .add(timeAdd, 'm')
+    .format('X');
