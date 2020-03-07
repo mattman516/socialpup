@@ -8,6 +8,8 @@ import { Helmet } from 'react-helmet';
 import { useSelector, useDispatch } from 'react-redux';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ToggleButton from 'react-bootstrap/ToggleButton';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import moment from 'moment';
@@ -18,18 +20,21 @@ import { MdGpsFixed } from 'react-icons/md';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
 import ReactMapGL, { Marker } from 'react-map-gl';
-import { setWalk, fetchWalks, deleteWalk } from './actions';
+import { setWalk, fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks } from './actions';
 import AddFollowers from '../AddFollowers';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import saga from './saga';
 import reducer from './reducer';
-import { makeSelectWalkList } from './selectors';
+import { makeSelectWalkList, makeSelectOtherWalkList } from './selectors';
+import { makeSelectCurrentUser } from '../App/selectors';
 
 export default function MapPage() {
   const dispatch = useDispatch();
   useInjectSaga({ key: 'map', saga });
   useInjectReducer({ key: 'map', reducer });
+  const currUser = useSelector(makeSelectCurrentUser());
   const walkList = useSelector(makeSelectWalkList());
+  const otherWalkList = useSelector(makeSelectOtherWalkList());
   const [latitude, setLat] = React.useState(37.7577);
   const [longitude, setLong] = React.useState(-122.4376);
   const [modalOpen, setModalOpen] = React.useState(false);
@@ -42,16 +47,18 @@ export default function MapPage() {
   });
 
   React.useEffect(() => {
+    console.log('currUser', currUser);
     handleSetCurrentLocation();
-  }, []);
+  }, [currUser.id]);
 
   const handleSetCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(x => {
       dispatch(fetchWalks());
-      setLat(x.coords.latitude);
-      setLong(x.coords.longitude);
+      dispatch(fetchFollowedWalks());
       setCurrLocationMark([x.coords.latitude, x.coords.longitude]);
       console.log('LOCATION', latitude, longitude);
+      setLat(x.coords.latitude);
+      setLong(x.coords.longitude);
       setViewport({ ...viewport, latitude, longitude });
     });
   };
@@ -83,7 +90,6 @@ export default function MapPage() {
     dispatch(deleteWalk(walk));
   };
   const handleFormChange = e => {
-    console.log('WALKENDS', e);
     if (e.target.id === 'walktime') {
       const walkEnds = getDate(e.target.value);
       setWalkEvent({
@@ -97,6 +103,13 @@ export default function MapPage() {
       });
     }
   };
+  const handleOtherButtonClick = e => {
+    if (e.target.value === 'All Others') {
+      dispatch(fetchAllWalks());
+    } else if (e.target.value === 'Only Followed') {
+      dispatch(fetchFollowedWalks());
+    }
+  }
 
   return (
     <div style={{ width: '100%' }}>
@@ -122,6 +135,14 @@ export default function MapPage() {
         >
           <FaGlobe /> Find Me
         </Button>
+        <ButtonGroup toggle onChange={handleOtherButtonClick}>
+          <ToggleButton type="radio" name="radio" defaultChecked value="All Others">
+            All Others
+          </ToggleButton>
+          <ToggleButton type="radio" name="radio" value="Only Followed">
+            Only Following
+          </ToggleButton>
+        </ButtonGroup>
         <AddFollowers />
       </div>
       <ReactMapGL
@@ -139,8 +160,27 @@ export default function MapPage() {
           offsetLeft={0}
           offsetTop={0}
         >
-          <MdGpsFixed/>
+          <MdGpsFixed />
         </Marker>
+        {otherWalkList.map(walk => (
+          <Marker
+            key={walk.id}
+            latitude={walk.latitude}
+            longitude={walk.longitude}
+            offsetLeft={0}
+            offsetTop={0}
+          >
+            <OverlayTrigger
+              placement="top"
+              overlay={<Tooltip>{walk.name}</Tooltip>}
+            >
+              <FaMapMarker
+                onClick={handleDeleteWalk(walk)}
+                style={{ color: 'red' }}
+              />
+            </OverlayTrigger>
+          </Marker>
+        ))}
         {walkList.map(walk => (
           <Marker
             key={walk.id}

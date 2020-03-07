@@ -8,3 +8,8 @@ export const makeSelectWalkList = () =>
     selectWalkState,
     walkState => walkState.walkList,
   );
+export const makeSelectOtherWalkList = () =>
+  createSelector(
+    selectWalkState,
+    walkState => walkState.otherWalkList,
+  );

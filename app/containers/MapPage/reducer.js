@@ -8,11 +8,12 @@
  */
 
 import produce from 'immer';
-import { SET_WALK_LIST } from './constants';
+import { SET_WALK_LIST, SET_OTHERS_WALK_LIST } from './constants';
 
 // The initial state of the App
 export const initialState = {
   walkList: [],
+  otherWalkList: [],
 };
 
 /* eslint-disable default-case, no-param-reassign */
@@ -23,6 +24,9 @@ const appReducer = (state = initialState, action) =>
         console.log('REDUCER SET WALK LIST', action.data);
         draft.walkList = action.data;
         break;
+      case SET_OTHERS_WALK_LIST:
+        console.log('REDUCER SET OTHERS WALK LIST', action.data);
+        draft.otherWalkList = action.data;
     }
   });
 

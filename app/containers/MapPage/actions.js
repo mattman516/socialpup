@@ -1,4 +1,12 @@
-import { SET_WALK, FETCH_WALKS, SET_WALK_LIST, DELETE_WALK } from './constants';
+import {
+  SET_WALK,
+  FETCH_WALKS,
+  SET_WALK_LIST,
+  DELETE_WALK,
+  SET_OTHERS_WALK_LIST,
+  FETCH_ALL_WALKS,
+  FETCH_FOLLOWED_WALKS,
+} from './constants';
 
 // action to save walk to db
 export const setWalk = walk => ({
@@ -19,4 +27,17 @@ export const setWalkList = walkList => ({
 export const deleteWalk = walk => ({
   type: DELETE_WALK,
   data: walk,
+});
+// action to trigger walk list download
+export const fetchFollowedWalks = () => ({
+  type: FETCH_FOLLOWED_WALKS,
+});
+// action to trigger walk list download
+export const fetchAllWalks = () => ({
+  type: FETCH_ALL_WALKS,
+});
+// action to set other walk list
+export const setOthersWalkList = walks => ({
+  type: SET_OTHERS_WALK_LIST,
+  data: walks,
 });
