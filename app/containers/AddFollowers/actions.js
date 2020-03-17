@@ -1,7 +1,6 @@
 import { FETCH_USER_LIST, SET_USER_LIST, ADD_FOLLOWER } from './constants';
 
 export function fetchAllUsers() {
-  console.log('action');
   return {
     type: FETCH_USER_LIST,
   };

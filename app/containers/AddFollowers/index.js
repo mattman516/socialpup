@@ -11,7 +11,7 @@ import reducer from './reducer';
 import { makeSelectUserList } from './selectors';
 import { makeSelectCurrentUser } from '../App/selectors';
 import Modal from 'react-bootstrap/Modal';
-import Form from 'react-bootstrap/Form';
+import { Typeahead } from 'react-bootstrap-typeahead';
 
 export default function AddFollowers() {
   const dispatch = useDispatch();
@@ -23,16 +23,13 @@ export default function AddFollowers() {
   useInjectReducer({ key: 'followers', reducer });
 
   const handleButtonClick = e => {
-    console.log('HANDLE_BUTTON_CLICK')
     // setCurrentUser()
     dispatch(fetchAllUsers());
     setModalOpen(true);
   };
 
-  const handleFormChange = e => {
-    if (e.target.id === 'userList') {
-      setCurrentNewFollower(e.target.value);
-    }
+  const handleFormChange = val => {
+    setCurrentNewFollower(val[0].owner);
   }
 
   const handleSubmit = () => {
@@ -53,14 +50,14 @@ export default function AddFollowers() {
       <Modal show={modalOpen} onHide={handleClose}>
         <Modal.Header>Find Pup</Modal.Header>
         <Modal.Body>
-          <Form onChange={handleFormChange}>
-            <Form.Control id="userList" as="select" defaultValue={''}>
-              <option value={''}>Pick a pup to follow...</option>
-              {userList.map(val => (
-                <option key={val.owner} value={val.owner}>{val.owner}</option>
-              ))}
-            </Form.Control>
-          </Form>
+          <Typeahead
+            id={'userList'}
+            options={userList}
+            labelKey="owner"
+            onChange={handleFormChange}
+            autoFocus
+            placeholder="Search for user..."
+          />
           <div>
             <h6>Already following:</h6>
             {(currentUser.following || []).map(u => (
@@ -70,7 +67,7 @@ export default function AddFollowers() {
         </Modal.Body>
         <Modal.Footer>
           <Button type="button" onClick={handleClose}>
-            Cancel
+            Close
           </Button>
           <Button type="submit" onClick={handleSubmit}>
             Follow Pup
