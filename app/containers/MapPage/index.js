@@ -19,7 +19,7 @@ import { MdGpsFixed } from 'react-icons/md';
 
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
-import ReactMapGL, { Marker } from 'react-map-gl';
+import ReactMapGL, { Marker, Source, Layer } from 'react-map-gl';
 import { setWalk, fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks } from './actions';
 import AddFollowers from '../AddFollowers';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -27,6 +27,7 @@ import saga from './saga';
 import reducer from './reducer';
 import { makeSelectWalkList, makeSelectOtherWalkList } from './selectors';
 import { makeSelectCurrentUser } from '../App/selectors';
+import * as Layers from './layers';
 
 export default function MapPage() {
   const dispatch = useDispatch();
@@ -50,6 +51,7 @@ export default function MapPage() {
     console.log('currUser', currUser);
     handleSetCurrentLocation();
   }, [currUser.id]);
+  let _sourceRef = React.createRef();
 
   const handleSetCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(x => {
@@ -70,12 +72,33 @@ export default function MapPage() {
   };
 
   const handleMapClick = clickE => {
+    if (clickE.features[0]) {
+      const feature = clickE.features[0];
+      const clusterId = feature.properties.cluster_id;
+  
+      const mapboxSource = _sourceRef.current.getSource();
+  
+      mapboxSource.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) {
+          return;
+        }
+  
+        handleViewportChange({
+          ...viewport,
+          longitude: feature.geometry.coordinates[0],
+          latitude: feature.geometry.coordinates[1],
+          zoom,
+          transitionDuration: 100
+        });
+      });
+    } else {
     setModalOpen(true);
     setWalkEvent({
       walkEnds: getDate(30),
       latitude: `${clickE.lngLat[1]}`,
       longitude: `${clickE.lngLat[0]}`,
     });
+    }
   };
   const handleWalkCreate = () => {
     setModalOpen(false);
@@ -153,7 +176,13 @@ export default function MapPage() {
         onViewportChange={handleViewportChange}
         mapStyle="mapbox://styles/mapbox/streets-v11"
         onClick={handleMapClick}
+        interactiveLayerIds={['clusters']}
       >
+        <Source type="geojson" data={convertToGeoJSON(otherWalkList)} cluster={true} clusterRadius={50} clusterMaxZoom={14} ref={_sourceRef}>
+          <Layer {...Layers.clusterLayer}/>
+          <Layer {...Layers.clusterCountLayer}/>
+          <Layer {...Layers.unclusteredPointLayer}/>
+        </Source>
         <Marker
           latitude={currLocationMark[0]}
           longitude={currLocationMark[1]}
@@ -162,25 +191,6 @@ export default function MapPage() {
         >
           <MdGpsFixed />
         </Marker>
-        {otherWalkList.map(walk => (
-          <Marker
-            key={walk.id}
-            latitude={walk.latitude}
-            longitude={walk.longitude}
-            offsetLeft={0}
-            offsetTop={0}
-          >
-            <OverlayTrigger
-              placement="top"
-              overlay={<Tooltip>{walk.name}</Tooltip>}
-            >
-              <FaMapMarker
-                onClick={handleDeleteWalk(walk)}
-                style={{ color: 'red' }}
-              />
-            </OverlayTrigger>
-          </Marker>
-        ))}
         {walkList.map(walk => (
           <Marker
             key={walk.id}
@@ -233,3 +243,19 @@ const getDate = timeAdd =>
   moment(new Date())
     .add(timeAdd, 'm')
     .format('X');
+
+const convertToGeoJSON = (walkList) => {
+  const features = walkList.map(walk => ({
+    type: 'Feature',
+    properties: walk,
+    geometry: {
+      type: 'Point',
+      coordinates: [walk.longitude, walk.latitude],
+    },
+  }));
+
+  return {
+    features,
+    type: 'FeatureCollection'
+  };
+}

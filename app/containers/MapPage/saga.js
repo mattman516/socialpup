@@ -72,7 +72,7 @@ export function* processFetchAllWalks() {
   let mappedWalkList = [];
   const authState = yield select(makeSelectAuthState());
   if (authState.authUserData.username) {
-    walkList = yield API.graphql(graphqlOperation(listWalks));
+    walkList = yield API.graphql(graphqlOperation(listWalks, { filter: {owner: { ne: authState.authUserData.username }} }));
     mappedWalkList = walkList.data.listWalks.items.map(walk => ({
       ...walk,
       latitude: parseFloat(walk.latitude),
