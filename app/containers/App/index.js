@@ -1,4 +1,5 @@
 import React from 'react';
+import { Helmet } from 'react-helmet';
 import { Link, Switch, Route, Redirect } from 'react-router-dom';
 import { Authenticator } from 'aws-amplify-react';
 import queryString from 'query-string';
@@ -120,6 +121,9 @@ const App = () => {
 
   return (
     <div className="App">
+      <Helmet>
+        <title>Social Pups</title>
+      </Helmet>
       <HeaderLinks {...{ authState }} />
       <br />
       <Routes childProps={childProps} />

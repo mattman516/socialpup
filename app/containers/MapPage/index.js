@@ -4,18 +4,17 @@
  * List all the features
  */
 import React from 'react';
-import { Helmet } from 'react-helmet';
 import { useSelector, useDispatch } from 'react-redux';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Spinner from 'react-bootstrap/Spinner';
+import FindMeButton from '../../components/FindMeButton';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import moment from 'moment';
 import Form from 'react-bootstrap/Form';
-import { FaMapMarker, FaGlobe } from 'react-icons/fa';
+import { FaMapMarker } from 'react-icons/fa';
 import { MdGpsFixed } from 'react-icons/md';
 
 import { useInjectSaga } from 'utils/injectSaga';
@@ -23,6 +22,7 @@ import { useInjectReducer } from 'utils/injectReducer';
 import ReactMapGL, { Marker, Source, Layer } from 'react-map-gl';
 import { setWalk, fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks } from './actions';
 import AddFollowers from '../AddFollowers';
+import PreviousWalks from '../PreviousWalks';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import saga from './saga';
 import reducer from './reducer';
@@ -42,6 +42,7 @@ export default function MapPage() {
   const [modalOpen, setModalOpen] = React.useState(false);
   const [positionLoad, setPositionLoad] = React.useState(false);
   const [walkEvent, setWalkEvent] = React.useState();
+  const [otherWalksToggle, setOtherWalksToggle] = React.useState('Only Followed');
   const [currLocationMark, setCurrLocationMark] = React.useState([1, 2]);
   const [viewport, setViewport] = React.useState({
     width: '100%',
@@ -100,12 +101,12 @@ export default function MapPage() {
         });
       });
     } else {
-    setModalOpen(true);
-    setWalkEvent({
-      walkEnds: getDate(30),
-      latitude: `${clickE.lngLat[1]}`,
-      longitude: `${clickE.lngLat[0]}`,
-    });
+      setModalOpen(true);
+      setWalkEvent({
+        walkEnds: getDate(30),
+        latitude: `${clickE.lngLat[1]}`,
+        longitude: `${clickE.lngLat[0]}`,
+      });
     }
   };
   const handleWalkCreate = () => {
@@ -117,7 +118,6 @@ export default function MapPage() {
     setWalkEvent();
   };
   const handleDeleteWalk = walk => () => {
-    console.log('HANLDE_DELETE');
     dispatch(deleteWalk(walk));
   };
   const handleFormChange = e => {
@@ -135,6 +135,7 @@ export default function MapPage() {
     }
   };
   const handleOtherButtonClick = e => {
+    setOtherWalksToggle(e.target.value);
     if (e.target.value === 'All Others') {
       dispatch(fetchAllWalks());
     } else if (e.target.value === 'Only Followed') {
@@ -144,13 +145,6 @@ export default function MapPage() {
 
   return (
     <div style={{ width: '100%' }}>
-      <Helmet>
-        <title>Map Page</title>
-        <meta
-          name="description"
-          content="Feature page of React.js Boilerplate application"
-        />
-      </Helmet>
       <div
         style={{
           display: 'flex',
@@ -159,22 +153,12 @@ export default function MapPage() {
           marginTop: 0,
         }}
       >
-        <Button
-          type="button"
-          onClick={handleSetCurrentLocation}
-          style={{ display: 'flex', alignItems: 'center' }}
-        >
-          {positionLoad ?
-            <Spinner animation="grow" style={{ height: 15, width: 15 }}/> :
-            <FaGlobe />
-          }
-          Find Me
-        </Button>
-        <ButtonGroup toggle onChange={handleOtherButtonClick}>
-          <ToggleButton type="radio" name="radio" defaultChecked value="All Others">
+        <FindMeButton {...{handleSetCurrentLocation, positionLoad}} />
+        <ButtonGroup toggle onChange={handleOtherButtonClick} value={otherWalksToggle}>
+          <ToggleButton type="radio" name="radio" value="All Others" checked={(otherWalksToggle === 'All Others')}>
             All Others
           </ToggleButton>
-          <ToggleButton type="radio" name="radio" value="Only Followed">
+          <ToggleButton type="radio" name="radio" value="Only Followed" checked={(otherWalksToggle === 'Only Followed')}>
             Only Following
           </ToggleButton>
         </ButtonGroup>
@@ -220,35 +204,42 @@ export default function MapPage() {
           </Marker>
         ))}
       </ReactMapGL>
-      <Modal show={modalOpen} onHide={() => setModalOpen(false)}>
-        <Modal.Header>Create Walk</Modal.Header>
-        <Modal.Body>
-          <Form onChange={handleFormChange}>
-            <Form.Control
-              id="walkname"
-              type="text"
-              placeholder="Where you going?"
-            />
-            <Form.Control id="walktime" as="select" defaultValue={30}>
-              {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
-                <option key={val} value={val}>
-                  {val}
-                </option>
-              ))}
-            </Form.Control>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button type="button" onClick={handleCancelWalkCreate}>
-            Cancel
-          </Button>
-          <Button type="submit" onClick={handleWalkCreate}>
-            Create Walk
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <CreateWalkModal {...{modalOpen, setModalOpen, handleFormChange, handleCancelWalkCreate, handleWalkCreate}} />
+      <PreviousWalks />
     </div>
   );
+}
+
+const CreateWalkModal = ({modalOpen, setModalOpen, handleFormChange, handleCancelWalkCreate, handleWalkCreate}) => {
+  return (
+    <Modal show={modalOpen} onHide={() => setModalOpen(false)}>
+      <Modal.Header>Create Walk</Modal.Header>
+      <Modal.Body>
+        <Form onChange={handleFormChange}>
+          <Form.Control
+            id="walkname"
+            type="text"
+            placeholder="Where you going?"
+          />
+          <Form.Control id="walktime" as="select" defaultValue={30}>
+            {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
+              <option key={val} value={val}>
+                {val}
+              </option>
+            ))}
+          </Form.Control>
+        </Form>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button type="button" onClick={handleCancelWalkCreate}>
+          Cancel
+        </Button>
+        <Button type="submit" onClick={handleWalkCreate}>
+          Create Walk
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  )
 }
 
 const getDate = timeAdd =>
