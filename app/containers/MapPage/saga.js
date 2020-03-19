@@ -3,6 +3,7 @@ import { API, graphqlOperation } from 'aws-amplify';
 import { makeSelectAuthState, makeSelectCurrentUser } from '../App/selectors';
 import { createWalk, deleteWalk } from '../../../src/graphql/mutations';
 import { getWalkByOwner } from '../../../src/GSIGraphql';
+import moment from 'moment';
 import {
   SET_WALK,
   FETCH_WALKS,
@@ -71,13 +72,27 @@ export function* processFetchAllWalks() {
   let walkList = [];
   let mappedWalkList = [];
   const authState = yield select(makeSelectAuthState());
+  const currUser = yield select(makeSelectCurrentUser());
+  const end = getDate(currUser.previousWalkLookback);
   if (authState.authUserData.username) {
-    walkList = yield API.graphql(graphqlOperation(listWalks, { filter: {owner: { ne: authState.authUserData.username }} }));
-    mappedWalkList = walkList.data.listWalks.items.map(walk => ({
-      ...walk,
-      latitude: parseFloat(walk.latitude),
-      longitude: parseFloat(walk.longitude),
-    }));
+    let nextToken; 
+    do {
+      walkList = yield API.graphql(graphqlOperation(listWalks,
+        { nextToken,
+          filter: {
+            owner: { ne: authState.authUserData.username },
+            walkEnds: { gt: end },
+          },
+        }));
+      nextToken = walkList.data.listWalks.nextToken;
+      walkList.data.listWalks.items.forEach(walk => {
+        mappedWalkList.push({
+          ...walk,
+          latitude: parseFloat(walk.latitude),
+          longitude: parseFloat(walk.longitude),
+        });
+      });
+    }while(nextToken);
     console.log('FETCH ALL WALKS', mappedWalkList);
   }
   yield put(setOthersWalkList(mappedWalkList));
@@ -88,7 +103,7 @@ export function* processFollowedWalks() {
   const currUser = yield select(makeSelectCurrentUser());
   if (authState.authUserData.username && currUser.following) {
     allCalls = yield all(
-      currUser.following.map(user => call(grabMappedWalksByUser, user)),
+      currUser.following.map(user => call(grabMappedWalksByUser, user, currUser.previousWalkLookback)),
     );
   }
   let combined = [];
@@ -98,15 +113,23 @@ export function* processFollowedWalks() {
   yield put(setOthersWalkList(combined));
 }
 
-function* grabMappedWalksByUser(user) {
-  const walkList = yield API.graphql(
-    graphqlOperation(getWalkByOwner, { owner: user }),
-  );
-  const mappedWalkList = walkList.data.ownerEndTime.items.map(walk => ({
-    ...walk,
-    latitude: parseFloat(walk.latitude),
-    longitude: parseFloat(walk.longitude),
-  }));
+function* grabMappedWalksByUser(user, history) {
+  let mappedWalkList = [];
+  let nextToken = '';
+  const end = getDate(history);
+  do {
+    const walkList = yield API.graphql(
+      graphqlOperation(getWalkByOwner, { owner: user, endTime: end }),
+    );
+    walkList.data.ownerEndTime.items.forEach(walk => {
+      mappedWalkList.push({
+        ...walk,
+        latitude: parseFloat(walk.latitude),
+        longitude: parseFloat(walk.longitude),
+      });
+    });
+  }while(nextToken);
+
   return mappedWalkList;
 }
 
@@ -118,3 +141,11 @@ function* mapSaga() {
   yield takeLatest(FETCH_FOLLOWED_WALKS, processFollowedWalks);
 }
 export default mapSaga;
+
+const getDate = history => {
+  let allCheck = history === -1 ? -1800000 : -history;
+  let timeAdd = parseInt(moment(new Date())
+  .add(allCheck, 'm')
+  .format('X'), 10);
+  return timeAdd;
+}

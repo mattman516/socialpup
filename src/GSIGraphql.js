@@ -1,6 +1,6 @@
 export const getWalkByOwner = /* GraphQL */ `
-  query getWalkByOwner($owner: String!) {
-    ownerEndTime(owner: $owner) {
+  query getWalkByOwner($owner: String!, $endTime: Int!) {
+    ownerEndTime(owner: $owner, walkEnds: { gt: $endTime}) {
       items {
         id
         walkEnds

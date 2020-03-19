@@ -26,5 +26,6 @@ type UserInfo @model
     id: ID!
     publicity: String
     following: [ID]
+    previousWalkLookback: Int
     owner: String
   }

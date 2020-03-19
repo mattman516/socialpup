@@ -5,7 +5,7 @@ import FollowingUser from '../FollowingUser';
 
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
-import { fetchAllUsers, addFollower } from './actions';
+import { fetchAllUsers, addFollower, updateLookback } from './actions';
 import saga from './saga';
 import reducer from './reducer';
 import { makeSelectUserList } from './selectors';
@@ -19,8 +19,15 @@ export default function AddFollowers() {
   const currentUser = useSelector(makeSelectCurrentUser());
   const [modalOpen, setModalOpen] = React.useState(false);
   const [currentNewFollower, setCurrentNewFollower] = React.useState();
+  const [defaultVal, setDefaultVal] = React.useState('');
   useInjectSaga({ key: 'followers', saga });
   useInjectReducer({ key: 'followers', reducer });
+
+  React.useEffect(() => {
+    const startLookback  = lookbackValues.find(x => x.value === currentUser.previousWalkLookback);
+    const label = startLookback ? startLookback.label : 'All';
+    setDefaultVal(label);
+  }, [])
 
   const handleButtonClick = e => {
     // setCurrentUser()
@@ -41,6 +48,11 @@ export default function AddFollowers() {
   const handleClose = () => {
     setModalOpen(false);
   }
+  const handleLookbackTime = (val) => {
+    if (val[0]) {
+      dispatch(updateLookback(val[0].value));
+    }
+  }
 
   return (
     <React.Fragment>
@@ -50,6 +62,15 @@ export default function AddFollowers() {
       <Modal show={modalOpen} onHide={handleClose}>
         <Modal.Header>Find Pup</Modal.Header>
         <Modal.Body>
+          <Typeahead
+            id={'lookback'}
+            options={lookbackValues}
+            defaultInputValue={defaultVal}
+            labelKey="label"
+            onChange={handleLookbackTime}
+            autoFocus
+            label="Include walks ending how many minutes ago"
+          />
           <Typeahead
             id={'userList'}
             options={userList}
@@ -77,3 +98,12 @@ export default function AddFollowers() {
     </React.Fragment>
   );
 }
+
+const lookbackValues = [
+  {value: 0, label: 'Now' },
+  {value: 15, label: '15 min ago' },
+  {value: 30, label: '30 min ago' },
+  {value: 60, label: '1 hour ago' },
+  {value: 120, label: '2 hours ago' },
+  {value: 'all', label: 'all time' },
+]

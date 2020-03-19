@@ -42,6 +42,7 @@ export const getUserInfo = /* GraphQL */ `
       id
       publicity
       following
+      previousWalkLookback
       owner
     }
   }
@@ -57,6 +58,7 @@ export const listUserInfos = /* GraphQL */ `
         id
         publicity
         following
+        previousWalkLookback
         owner
       }
       nextToken

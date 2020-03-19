@@ -49,6 +49,7 @@ export const onCreateUserInfo = /* GraphQL */ `
       id
       publicity
       following
+      previousWalkLookback
       owner
     }
   }
@@ -59,6 +60,7 @@ export const onUpdateUserInfo = /* GraphQL */ `
       id
       publicity
       following
+      previousWalkLookback
       owner
     }
   }
@@ -69,6 +71,7 @@ export const onDeleteUserInfo = /* GraphQL */ `
       id
       publicity
       following
+      previousWalkLookback
       owner
     }
   }

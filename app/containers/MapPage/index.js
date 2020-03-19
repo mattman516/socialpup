@@ -9,6 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Spinner from 'react-bootstrap/Spinner';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
@@ -39,6 +40,7 @@ export default function MapPage() {
   const [latitude, setLat] = React.useState(37.7577);
   const [longitude, setLong] = React.useState(-122.4376);
   const [modalOpen, setModalOpen] = React.useState(false);
+  const [positionLoad, setPositionLoad] = React.useState(false);
   const [walkEvent, setWalkEvent] = React.useState();
   const [currLocationMark, setCurrLocationMark] = React.useState([1, 2]);
   const [viewport, setViewport] = React.useState({
@@ -54,7 +56,10 @@ export default function MapPage() {
   let _sourceRef = React.createRef();
 
   const handleSetCurrentLocation = () => {
+    console.log('GET CURR LOCATION');
+    setPositionLoad(true);
     navigator.geolocation.getCurrentPosition(x => {
+      setPositionLoad(false);
       dispatch(fetchWalks());
       dispatch(fetchFollowedWalks());
       setCurrLocationMark([x.coords.latitude, x.coords.longitude]);
@@ -62,6 +67,9 @@ export default function MapPage() {
       setLat(x.coords.latitude);
       setLong(x.coords.longitude);
       setViewport({ ...viewport, latitude, longitude });
+    }, x => {
+      console.error(x);
+      setPositionLoad(false);
     });
   };
 
@@ -156,7 +164,11 @@ export default function MapPage() {
           onClick={handleSetCurrentLocation}
           style={{ display: 'flex', alignItems: 'center' }}
         >
-          <FaGlobe /> Find Me
+          {positionLoad ?
+            <Spinner animation="grow" style={{ height: 15, width: 15 }}/> :
+            <FaGlobe />
+          }
+          Find Me
         </Button>
         <ButtonGroup toggle onChange={handleOtherButtonClick}>
           <ToggleButton type="radio" name="radio" defaultChecked value="All Others">
