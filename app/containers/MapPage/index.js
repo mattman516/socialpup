@@ -46,7 +46,7 @@ export default function MapPage() {
   const [currLocationMark, setCurrLocationMark] = React.useState([1, 2]);
   const [viewport, setViewport] = React.useState({
     width: '100%',
-    height: 400,
+    height: '70vh',
     zoom: 12,
   });
 
@@ -144,69 +144,42 @@ export default function MapPage() {
   }
 
   return (
-    <div style={{ width: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          margin: 30,
-          marginTop: 0,
-        }}
-      >
-        <FindMeButton {...{handleSetCurrentLocation, positionLoad}} />
-        <ButtonGroup toggle onChange={handleOtherButtonClick} value={otherWalksToggle}>
-          <ToggleButton type="radio" name="radio" value="All Others" checked={(otherWalksToggle === 'All Others')}>
-            All Others
-          </ToggleButton>
-          <ToggleButton type="radio" name="radio" value="Only Followed" checked={(otherWalksToggle === 'Only Followed')}>
-            Only Following
-          </ToggleButton>
-        </ButtonGroup>
-        <AddFollowers />
+    <React.Fragment>
+      <div style={{ width: '100%', position: 'fixed', top: 100 }}>
+        <HeaderButtons
+          {...{
+            handleSetCurrentLocation,
+            positionLoad,
+            otherWalksToggle,
+            handleOtherButtonClick,
+          }}
+        />
+        <Map 
+          {...{
+            viewport,
+            latitude,
+            longitude,
+            handleViewportChange,
+            handleMapClick,
+            otherWalkList,
+            _sourceRef,
+            currLocationMark,
+            walkList,
+            handleDeleteWalk
+          }}
+        />
+        <CreateWalkModal
+          {...{
+            modalOpen,
+            setModalOpen,
+            handleFormChange,
+            handleCancelWalkCreate,
+            handleWalkCreate,
+          }}
+        />
       </div>
-      <ReactMapGL
-        {...viewport}
-        latitude={latitude}
-        longitude={longitude}
-        mapboxApiAccessToken="pk.eyJ1IjoibWF0dG1hbjUxNiIsImEiOiJjazc5NjA0cWUwcHd3M3RwNWI2NTY0eWV3In0.vHHG1fz0pAZ-TZxA8DqNUQ"
-        onViewportChange={handleViewportChange}
-        mapStyle="mapbox://styles/mapbox/streets-v11"
-        onClick={handleMapClick}
-        interactiveLayerIds={['clusters']}
-      >
-        <Source type="geojson" data={convertToGeoJSON(otherWalkList)} cluster={true} clusterRadius={50} clusterMaxZoom={14} ref={_sourceRef}>
-          <Layer {...Layers.clusterLayer}/>
-          <Layer {...Layers.clusterCountLayer}/>
-          <Layer {...Layers.unclusteredPointLayer}/>
-        </Source>
-        <Marker
-          latitude={currLocationMark[0]}
-          longitude={currLocationMark[1]}
-          offsetLeft={0}
-          offsetTop={0}
-        >
-          <MdGpsFixed />
-        </Marker>
-        {walkList.map(walk => (
-          <Marker
-            key={walk.id}
-            latitude={walk.latitude}
-            longitude={walk.longitude}
-            offsetLeft={0}
-            offsetTop={0}
-          >
-            <OverlayTrigger
-              placement="top"
-              overlay={<Tooltip>{walk.name}</Tooltip>}
-            >
-              <FaMapMarker onClick={handleDeleteWalk(walk)} />
-            </OverlayTrigger>
-          </Marker>
-        ))}
-      </ReactMapGL>
-      <CreateWalkModal {...{modalOpen, setModalOpen, handleFormChange, handleCancelWalkCreate, handleWalkCreate}} />
       <PreviousWalks />
-    </div>
+    </React.Fragment>
   );
 }
 
@@ -216,11 +189,13 @@ const CreateWalkModal = ({modalOpen, setModalOpen, handleFormChange, handleCance
       <Modal.Header>Create Walk</Modal.Header>
       <Modal.Body>
         <Form onChange={handleFormChange}>
+          <label for='walkname'>Destination</label>
           <Form.Control
             id="walkname"
             type="text"
             placeholder="Where you going?"
           />
+          <label for='walktime'>Walk duration</label>
           <Form.Control id="walktime" as="select" defaultValue={30}>
             {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
               <option key={val} value={val}>
@@ -239,6 +214,94 @@ const CreateWalkModal = ({modalOpen, setModalOpen, handleFormChange, handleCance
         </Button>
       </Modal.Footer>
     </Modal>
+  )
+}
+
+const Map = ({viewport, latitude, longitude, handleViewportChange, handleMapClick, otherWalkList, _sourceRef, currLocationMark, walkList, handleDeleteWalk}) => {
+  return (
+    <ReactMapGL
+      {...viewport}
+      latitude={latitude}
+      longitude={longitude}
+      mapboxApiAccessToken="pk.eyJ1IjoibWF0dG1hbjUxNiIsImEiOiJjazc5NjA0cWUwcHd3M3RwNWI2NTY0eWV3In0.vHHG1fz0pAZ-TZxA8DqNUQ"
+      onViewportChange={handleViewportChange}
+      mapStyle="mapbox://styles/mapbox/streets-v11"
+      onClick={handleMapClick}
+      interactiveLayerIds={['clusters']}
+    >
+      <Source type="geojson" data={convertToGeoJSON(otherWalkList)} cluster={true} clusterRadius={50} clusterMaxZoom={14} ref={_sourceRef}>
+        <Layer {...Layers.clusterLayer}/>
+        <Layer {...Layers.clusterCountLayer}/>
+        <Layer {...Layers.unclusteredPointLayer}/>
+      </Source>
+      <Marker
+        latitude={currLocationMark[0]}
+        longitude={currLocationMark[1]}
+        offsetLeft={0}
+        offsetTop={0}
+      >
+        <MdGpsFixed />
+      </Marker>
+      {walkList.map(walk => (
+        <Marker
+          key={walk.id}
+          latitude={walk.latitude}
+          longitude={walk.longitude}
+          offsetLeft={0}
+          offsetTop={0}
+        >
+          <OverlayTrigger
+            placement="top"
+            overlay={<Tooltip>{walk.name}</Tooltip>}
+          >
+            <FaMapMarker onClick={handleDeleteWalk(walk)} />
+          </OverlayTrigger>
+        </Marker>
+      ))}
+    </ReactMapGL>
+  )
+}
+
+const HeaderButtons = ({handleSetCurrentLocation, positionLoad, otherWalksToggle, handleOtherButtonClick}) => {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        margin: 25,
+      }}
+    >
+      <div
+        style={{
+          alignSelf: 'flex-top',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          padding: 5,
+        }}
+      >
+        <FindMeButton {...{handleSetCurrentLocation, positionLoad}} />
+        <AddFollowers />
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          width: '100%',
+          justifyContent: 'center',
+          alignSelf: 'flex-bottom',
+          padding: 5,
+        }}
+      >
+        <ButtonGroup toggle onChange={handleOtherButtonClick} value={otherWalksToggle} >
+          <ToggleButton type="radio" name="radio" value="All Others" checked={(otherWalksToggle === 'All Others')}>
+            All Others
+          </ToggleButton>
+          <ToggleButton type="radio" name="radio" value="Only Followed" checked={(otherWalksToggle === 'Only Followed')}>
+            Only Following
+          </ToggleButton>
+        </ButtonGroup>
+      </div>
+    </div>
   )
 }
 

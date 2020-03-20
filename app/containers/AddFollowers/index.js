@@ -62,6 +62,7 @@ export default function AddFollowers() {
       <Modal show={modalOpen} onHide={handleClose}>
         <Modal.Header>Find Pup</Modal.Header>
         <Modal.Body>
+          <label for='lookback'>Walk lookback time...</label>
           <Typeahead
             id={'lookback'}
             options={lookbackValues}
@@ -71,6 +72,7 @@ export default function AddFollowers() {
             autoFocus
             label="Include walks ending how many minutes ago"
           />
+          <label for='userList'>Follow new pups...</label>
           <Typeahead
             id={'userList'}
             options={userList}
