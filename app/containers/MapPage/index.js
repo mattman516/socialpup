@@ -237,24 +237,24 @@ const Map = ({viewport, latitude, longitude, handleViewportChange, handleMapClic
       <Marker
         latitude={currLocationMark[0]}
         longitude={currLocationMark[1]}
-        offsetLeft={0}
-        offsetTop={0}
+        offsetLeft={-10}
+        offsetTop={-12}
       >
-        <MdGpsFixed />
+        <MdGpsFixed style={{ fontSize: 20 }} />
       </Marker>
       {walkList.map(walk => (
         <Marker
           key={walk.id}
           latitude={walk.latitude}
           longitude={walk.longitude}
-          offsetLeft={0}
-          offsetTop={0}
+          offsetLeft={-10}
+          offsetTop={-20}
         >
           <OverlayTrigger
             placement="top"
             overlay={<Tooltip>{walk.name}</Tooltip>}
           >
-            <FaMapMarker onClick={handleDeleteWalk(walk)} />
+            <FaMapMarker style={{ fontSize: 20, color: 'tomato' }} onClick={handleDeleteWalk(walk)} />
           </OverlayTrigger>
         </Marker>
       ))}
