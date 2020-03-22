@@ -20,7 +20,7 @@ import { MdGpsFixed } from 'react-icons/md';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
 import ReactMapGL, { Marker, Source, Layer } from 'react-map-gl';
-import { setWalk, fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks } from './actions';
+import { setWalk, fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks, unsubscribeToWalks, subscribeToWalks } from './actions';
 import AddFollowers from '../AddFollowers';
 import PreviousWalks from '../PreviousWalks';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -51,8 +51,11 @@ export default function MapPage() {
   });
 
   React.useEffect(() => {
-    console.log('currUser', currUser);
     handleSetCurrentLocation();
+    return function cleanup() { // clean up
+      console.log("CLEANUP")
+      dispatch(unsubscribeToWalks());
+    }
   }, [currUser.id]);
   let _sourceRef = React.createRef();
 
@@ -63,6 +66,7 @@ export default function MapPage() {
       setPositionLoad(false);
       dispatch(fetchWalks());
       dispatch(fetchFollowedWalks());
+      dispatch(subscribeToWalks());
       setCurrLocationMark([x.coords.latitude, x.coords.longitude]);
       console.log('LOCATION', latitude, longitude);
       setLat(x.coords.latitude);
@@ -189,13 +193,13 @@ const CreateWalkModal = ({modalOpen, setModalOpen, handleFormChange, handleCance
       <Modal.Header>Create Walk</Modal.Header>
       <Modal.Body>
         <Form onChange={handleFormChange}>
-          <label for='walkname'>Destination</label>
+          <label htmlFor='walkname'>Destination</label>
           <Form.Control
             id="walkname"
             type="text"
             placeholder="Where you going?"
           />
-          <label for='walktime'>Walk duration</label>
+          <label htmlFor='walktime'>Walk duration</label>
           <Form.Control id="walktime" as="select" defaultValue={30}>
             {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
               <option key={val} value={val}>

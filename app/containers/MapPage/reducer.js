@@ -25,7 +25,7 @@ const appReducer = (state = initialState, action) =>
         draft.walkList = action.data;
         break;
       case SET_OTHERS_WALK_LIST:
-        console.log('REDUCER SET OTHERS WALK LIST', action.data);
+        console.log('REDUCER SET OTHERS WALK LIST', action.data.map(w => w.owner));
         draft.otherWalkList = action.data;
     }
   });

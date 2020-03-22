@@ -6,6 +6,8 @@ import {
   SET_OTHERS_WALK_LIST,
   FETCH_ALL_WALKS,
   FETCH_FOLLOWED_WALKS,
+  UNSUBSCRIBE_TO_WALKS,
+  SUBSCRIBE_TO_WALKS
 } from './constants';
 
 // action to save walk to db
@@ -41,3 +43,12 @@ export const setOthersWalkList = walks => ({
   type: SET_OTHERS_WALK_LIST,
   data: walks,
 });
+
+// action to unsubscribe to walks
+export const subscribeToWalks = () => ({
+  type: SUBSCRIBE_TO_WALKS
+})
+// action to unsubscribe to walks
+export const unsubscribeToWalks = () => ({
+  type: UNSUBSCRIBE_TO_WALKS
+})

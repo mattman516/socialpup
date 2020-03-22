@@ -27,7 +27,7 @@ export default function AddFollowers() {
     const startLookback  = lookbackValues.find(x => x.value === currentUser.previousWalkLookback);
     const label = startLookback ? startLookback.label : 'All';
     setDefaultVal(label);
-  }, [])
+  }, [currentUser])
 
   const handleButtonClick = e => {
     // setCurrentUser()
@@ -62,7 +62,7 @@ export default function AddFollowers() {
       <Modal show={modalOpen} onHide={handleClose}>
         <Modal.Header>Find Pup</Modal.Header>
         <Modal.Body>
-          <label for='lookback'>Walk lookback time...</label>
+          <label htmlFor='lookback'>Walk lookback time...</label>
           <Typeahead
             id={'lookback'}
             options={lookbackValues}
@@ -72,7 +72,7 @@ export default function AddFollowers() {
             autoFocus
             label="Include walks ending how many minutes ago"
           />
-          <label for='userList'>Follow new pups...</label>
+          <label htmlFor='userList'>Follow new pups...</label>
           <Typeahead
             id={'userList'}
             options={userList}
@@ -83,8 +83,8 @@ export default function AddFollowers() {
           />
           <div>
             <h6>Already following:</h6>
-            {(currentUser.following || []).map(u => (
-              <FollowingUser key={u} username={u} />
+            {(currentUser.following || []).map((u, key) => (
+              <FollowingUser key={`${u}${key}`} username={u} />
             ))}
           </div>
         </Modal.Body>

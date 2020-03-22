@@ -2,8 +2,8 @@
 // this is an auto generated file. This will be overwritten
 
 export const onCreateWalk = /* GraphQL */ `
-  subscription OnCreateWalk($owner: String!) {
-    onCreateWalk(owner: $owner) {
+  subscription OnCreateWalk {
+    onCreateWalk {
       id
       walkEnds
       publicity
@@ -16,8 +16,8 @@ export const onCreateWalk = /* GraphQL */ `
   }
 `;
 export const onUpdateWalk = /* GraphQL */ `
-  subscription OnUpdateWalk($owner: String!) {
-    onUpdateWalk(owner: $owner) {
+  subscription OnUpdateWalk {
+    onUpdateWalk {
       id
       walkEnds
       publicity
@@ -30,8 +30,8 @@ export const onUpdateWalk = /* GraphQL */ `
   }
 `;
 export const onDeleteWalk = /* GraphQL */ `
-  subscription OnDeleteWalk($owner: String!) {
-    onDeleteWalk(owner: $owner) {
+  subscription OnDeleteWalk {
+    onDeleteWalk {
       id
       walkEnds
       publicity
