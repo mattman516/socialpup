@@ -5,29 +5,27 @@
  */
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import FindMeButton from '../../components/FindMeButton';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import moment from 'moment';
-import Form from 'react-bootstrap/Form';
 import { FaMapMarker } from 'react-icons/fa';
 import { MdGpsFixed } from 'react-icons/md';
-
+import { CreateWalkModal } from '../CreateWalk';
 import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
+import reducer from './reducer';
 import ReactMapGL, { Marker, Source, Layer } from 'react-map-gl';
 import { setWalk, fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks, unsubscribeToWalks, subscribeToWalks } from './actions';
 import AddFollowers from '../AddFollowers';
 import PreviousWalks from '../PreviousWalks';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import saga from './saga';
-import reducer from './reducer';
 import { makeSelectWalkList, makeSelectOtherWalkList } from './selectors';
 import { makeSelectCurrentUser } from '../App/selectors';
+import { toggleCreateWalkModal } from '../CreateWalk/actions';
 import * as Layers from './layers';
 
 export default function MapPage() {
@@ -39,7 +37,6 @@ export default function MapPage() {
   const otherWalkList = useSelector(makeSelectOtherWalkList());
   const [latitude, setLat] = React.useState(37.7577);
   const [longitude, setLong] = React.useState(-122.4376);
-  const [modalOpen, setModalOpen] = React.useState(false);
   const [positionLoad, setPositionLoad] = React.useState(false);
   const [walkEvent, setWalkEvent] = React.useState();
   const [otherWalksToggle, setOtherWalksToggle] = React.useState('Only Followed');
@@ -105,7 +102,7 @@ export default function MapPage() {
         });
       });
     } else {
-      setModalOpen(true);
+      dispatch(toggleCreateWalkModal());
       setWalkEvent({
         walkEnds: getDate(30),
         latitude: `${clickE.lngLat[1]}`,
@@ -114,29 +111,15 @@ export default function MapPage() {
     }
   };
   const handleWalkCreate = () => {
-    setModalOpen(false);
+    dispatch(toggleCreateWalkModal());
     dispatch(setWalk(walkEvent));
   };
   const handleCancelWalkCreate = () => {
-    setModalOpen(false);
+    dispatch(toggleCreateWalkModal());
     setWalkEvent();
   };
   const handleDeleteWalk = walk => () => {
     dispatch(deleteWalk(walk));
-  };
-  const handleFormChange = e => {
-    if (e.target.id === 'walktime') {
-      const walkEnds = getDate(e.target.value);
-      setWalkEvent({
-        ...walkEvent,
-        walkEnds,
-      });
-    } else if (e.target.id === 'walkname') {
-      setWalkEvent({
-        ...walkEvent,
-        name: e.target.value,
-      });
-    }
   };
   const handleOtherButtonClick = e => {
     setOtherWalksToggle(e.target.value);
@@ -174,9 +157,7 @@ export default function MapPage() {
         />
         <CreateWalkModal
           {...{
-            modalOpen,
-            setModalOpen,
-            handleFormChange,
+            // handleFormChange,
             handleCancelWalkCreate,
             handleWalkCreate,
           }}
@@ -187,39 +168,6 @@ export default function MapPage() {
   );
 }
 
-const CreateWalkModal = ({modalOpen, setModalOpen, handleFormChange, handleCancelWalkCreate, handleWalkCreate}) => {
-  return (
-    <Modal show={modalOpen} onHide={() => setModalOpen(false)}>
-      <Modal.Header>Create Walk</Modal.Header>
-      <Modal.Body>
-        <Form onChange={handleFormChange}>
-          <label htmlFor='walkname'>Destination</label>
-          <Form.Control
-            id="walkname"
-            type="text"
-            placeholder="Where you going?"
-          />
-          <label htmlFor='walktime'>Walk duration</label>
-          <Form.Control id="walktime" as="select" defaultValue={30}>
-            {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map(val => (
-              <option key={val} value={val}>
-                {val}
-              </option>
-            ))}
-          </Form.Control>
-        </Form>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button type="button" onClick={handleCancelWalkCreate}>
-          Cancel
-        </Button>
-        <Button type="submit" onClick={handleWalkCreate}>
-          Create Walk
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  )
-}
 
 const Map = ({viewport, latitude, longitude, handleViewportChange, handleMapClick, otherWalkList, _sourceRef, currLocationMark, walkList, handleDeleteWalk}) => {
   return (

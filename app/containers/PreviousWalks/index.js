@@ -1,12 +1,20 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { makeSelectWalkList } from '../MapPage/selectors';
+import { toggleCreateWalkModal } from '../CreateWalk/actions';
 import { FaUndo, FaTrash } from 'react-icons/fa';
 import moment from 'moment';
 import IconButton from '../../components/IconButton'
 
 export default function AddFollowers() {
+  const dispatch = useDispatch();
   const walkList = useSelector(makeSelectWalkList());
+
+  const handleRedoWalk = (walk) => {
+
+    dispatch(toggleCreateWalkModal());
+  }
+
   return (
     <React.Fragment>
       <Wrapper>
@@ -16,14 +24,14 @@ export default function AddFollowers() {
         {walkList.map(walk => {
           return (
             <React.Fragment>
-              <div style={{ maxWidth: 1000, margin: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h6>{walk.name}</h6>
                   <p>{getDate(walk.walkEnds)}</p>
                 </div>
                 <div style={{ display: 'flex' }}>
                   <IconButton><FaTrash/></IconButton>
-                  <IconButton><FaUndo/></IconButton>
+                  <IconButton onClick={handleRedoWalk} ><FaUndo/></IconButton>
                 </div>
               </div>
               <hr/>
@@ -46,16 +54,23 @@ const getDate = (time) => {
 const Wrapper = props => {
   return (
     <div
-      {...props}
       style={{
         position: 'absolute',
         padding: 20,
         zIndex: 3,
         top: 'calc(100vh - 100px)',
-        width: '100vw',
         backgroundColor: 'white',
         paddingTop: 20,
+        width: '100vw',
       }}
-    />
+    >
+      <div
+        style={{ 
+          margin: 'auto',
+          maxWidth: 1000,
+        }}
+        {...props}
+      />
+    </div>
   )
 }

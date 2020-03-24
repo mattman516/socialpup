@@ -1,0 +1,1 @@
+export const TOGGLE_CREATE_WALK_MODAL = 'create/TOGGLE_CREATE_WALK_MODAL';
