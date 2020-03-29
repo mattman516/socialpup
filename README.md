@@ -1,6 +1,6 @@
 Please let me know if you think of a great new feature or enhancement, and especially if you find a bug! Also reach out if you have a question. It's a work in progress and everything can (and maybe should) change.
 
-Background
+## Background
 
 As you walk up to the dog park, your pup's mind is racing about all the friends they are about to see. It's always a little disappointing if they come into the park but find no-one and then all they can do is sniff around. 
 
@@ -13,7 +13,7 @@ I think this could also be used in this brave new COVID world, without dogs. As 
 The app should be fairly easy, after you sign-up, click on the map to tell people where you're heading. You can add follow more "Pups" by searching for their username and they'll show up on your map, or you can view all walks being taken now.
 You'll want to adjust how far back in history you're looking at the walks. Without to many other people you may not see anything unless you include all past walks.
 
-Technical
+## Technical
 
 Social Pups was built by Matt Nestler
 
