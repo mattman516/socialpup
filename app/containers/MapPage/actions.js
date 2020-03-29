@@ -7,7 +7,9 @@ import {
   FETCH_ALL_WALKS,
   FETCH_FOLLOWED_WALKS,
   UNSUBSCRIBE_TO_WALKS,
-  SUBSCRIBE_TO_WALKS
+  SUBSCRIBE_TO_WALKS,
+  SET_LAT_LNG,
+  SET_LIST_VISIBLE
 } from './constants';
 
 // action to save walk to db
@@ -52,3 +54,12 @@ export const subscribeToWalks = () => ({
 export const unsubscribeToWalks = () => ({
   type: UNSUBSCRIBE_TO_WALKS
 })
+// action to set lat lng of current view port
+export const setLatLng = (latLng) => ({
+  type: SET_LAT_LNG,
+  data: latLng
+});
+// action to set list visible
+export const setListVisible = () => ({
+  type: SET_LIST_VISIBLE,
+});

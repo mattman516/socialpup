@@ -84,7 +84,7 @@ export default function AddFollowers() {
           <div>
             <h6>Already following:</h6>
             {(currentUser.following || []).map((u, key) => (
-              <FollowingUser key={`${u}${key}`} username={u} />
+              <FollowingUser key={`${key}`} username={u} />
             ))}
           </div>
         </Modal.Body>

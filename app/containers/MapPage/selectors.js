@@ -13,3 +13,13 @@ export const makeSelectOtherWalkList = () =>
     selectWalkState,
     walkState => walkState.otherWalkList,
   );
+export const makeSelectLatLng = () =>
+  createSelector(
+    selectWalkState,
+    walkState => walkState.latLng,
+  );
+export const makeSelectListVisible = () =>
+  createSelector(
+    selectWalkState,
+    walkState => walkState.listVisible,
+  );

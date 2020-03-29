@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { Link, Switch, Route, Redirect } from 'react-router-dom';
+import { Link, Router, Route, Redirect } from 'react-router-dom';
 import { Authenticator } from 'aws-amplify-react';
 import queryString from 'query-string';
 import { useSelector, useDispatch } from 'react-redux';
@@ -14,25 +14,6 @@ import saga from './saga';
 
 Amplify.configure(aws_exports);
 
-const HeaderLinks = ({ authState }) => (
-  <div
-    style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignContent: 'center',
-      padding: 30,
-    }}
-  >
-    <Link to="/" style={{ textDecoration: 'none' }}>
-      Social Pups
-    </Link>
-    <Link to="/auth">
-      {authState.loggedIn
-        ? `${authState.authUserData.username} is logged in`
-        : 'Not Logged In'}
-    </Link>
-  </div>
-);
 
 const ProtectedRoute = ({ render: C, props: childProps, ...rest }) => (
   <Route
@@ -41,11 +22,7 @@ const ProtectedRoute = ({ render: C, props: childProps, ...rest }) => (
       childProps.isLoggedIn ? (
         <C {...rProps} {...childProps} />
       ) : (
-        <Redirect
-          to={`/auth?redirect=${rProps.location.pathname}${
-            rProps.location.search
-          }`}
-        />
+        <React.Fragment/>
       )
     }
   />
@@ -72,26 +49,20 @@ const AuthComponent = props => {
   };
   return (
     <div>
-      {authState === 'signedIn' && redirect ? (
-        <Redirect to={redirect} />
-      ) : (
-        <Authenticator onStateChange={handleStateChange} />
-      )}
+      <Authenticator onStateChange={handleStateChange} />
     </div>
   );
 };
 
 const Routes = ({ childProps }) => (
-  <Switch>
+  <div>
     <ProppedRoute
-      exact
-      path="/auth"
+      path="/"
       render={AuthComponent}
       props={childProps}
     />
-    <ProtectedRoute exact path="/" render={MapPage} props={childProps} />
-    <Route exact path="/about" render={() => <div>About Content</div>} />
-  </Switch>
+    <ProtectedRoute path="/" render={MapPage} props={childProps} />
+  </div>
 );
 
 const App = () => {
@@ -124,7 +95,6 @@ const App = () => {
       <Helmet>
         <title>Social Pups</title>
       </Helmet>
-      <HeaderLinks {...{ authState }} />
       <br />
       <Routes childProps={childProps} />
     </div>

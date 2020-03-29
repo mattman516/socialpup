@@ -139,6 +139,7 @@ function* grabMappedWalksByUser(user, history) {
         nextToken,
         owner: user,
         walkEnds: { gt: end },
+        sortDirection: 'DESC',
       }),
     );
     nextToken = walkList.data.ownerEndTime.nextToken;

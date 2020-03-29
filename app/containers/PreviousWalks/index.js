@@ -1,37 +1,51 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { makeSelectWalkList } from '../MapPage/selectors';
+import { makeSelectWalkList, makeSelectListVisible } from '../MapPage/selectors';
 import { toggleCreateWalkModal } from '../CreateWalk/actions';
-import { FaUndo, FaTrash } from 'react-icons/fa';
+import { FaUndo, FaTrash, FaSearch } from 'react-icons/fa';
 import moment from 'moment';
 import IconButton from '../../components/IconButton'
+import { setLatLng, setListVisible } from '../MapPage/actions';
 
 export default function AddFollowers() {
   const dispatch = useDispatch();
   const walkList = useSelector(makeSelectWalkList());
+  const listVisible = useSelector(makeSelectListVisible());
 
-  const handleRedoWalk = (walk) => {
-
-    dispatch(toggleCreateWalkModal());
+  const handleRedoWalk = (walk) => () => {
+    dispatch(toggleCreateWalkModal(walk));
+  }
+  const handleWalkClick = (walk) => () => {
+    dispatch(setLatLng([walk.latitude, walk.longitude]))
+  }
+  const handleDeleteWalk = (walk) => () => {
+    // dispatch(setLatLng([walk.latitude, walk.longitude]))
+  }
+  const handlePreviewWalk = (walk) => () => {
+    console.log('click');
+    dispatch(setListVisible());
+    handleWalkClick(walk)();
+    // dispatch(setLatLng([walk.latitude, walk.longitude]));
   }
 
   return (
     <React.Fragment>
-      <Wrapper>
+      <Wrapper listVisible={listVisible}>
         {walkList.length !== 0 && (
           <h3>Previous Walks</h3>
         )}
         {walkList.map(walk => {
           return (
-            <React.Fragment>
+            <React.Fragment key={walk.id}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+                <div onClick={handleWalkClick(walk)}>
                   <h6>{walk.name}</h6>
                   <p>{getDate(walk.walkEnds)}</p>
                 </div>
                 <div style={{ display: 'flex' }}>
-                  <IconButton><FaTrash/></IconButton>
-                  <IconButton onClick={handleRedoWalk} ><FaUndo/></IconButton>
+                  <IconButton onClick={handlePreviewWalk(walk)}><FaSearch/></IconButton>
+                  <IconButton onClick={handleDeleteWalk(walk)}><FaTrash/></IconButton>
+                  <IconButton onClick={handleRedoWalk(walk)} ><FaUndo/></IconButton>
                 </div>
               </div>
               <hr/>
@@ -57,7 +71,7 @@ const Wrapper = props => {
       style={{
         position: 'absolute',
         padding: 20,
-        zIndex: 3,
+        zIndex: props.listVisible ? 3 : -1,
         top: 'calc(100vh - 100px)',
         backgroundColor: 'white',
         paddingTop: 20,

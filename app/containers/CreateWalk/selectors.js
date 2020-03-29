@@ -8,3 +8,8 @@ export const makeSelectModalOpen = () =>
     selectCreateState,
     walkState => walkState.createWalkOpen,
   );
+export const makeSelectInitWalkState = () =>
+  createSelector(
+    selectCreateState,
+    walkState => walkState.initWalk,
+  );

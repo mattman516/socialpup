@@ -3,40 +3,59 @@ import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
+import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { toggleCreateWalkModal } from './actions';
-import { makeSelectModalOpen } from './selectors';
+import { setWalk } from '../MapPage/actions';
+import { makeSelectModalOpen, makeSelectInitWalkState } from './selectors';
 import { useInjectReducer } from 'utils/injectReducer';
 import reducer from './reducer';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-export const CreateWalkModal = ({ handleCancelWalkCreate, handleWalkCreate}) => {
+export const CreateWalkModal = () => {
 
   useInjectReducer({ key: 'create', reducer });
   const dispatch = useDispatch();
   const modalOpen = useSelector(makeSelectModalOpen());
+  const initWalk = useSelector(makeSelectInitWalkState());
+  const [walkEvent, setWalkEvent] = React.useState(new Object({}));
+
+  React.useEffect(() => {
+    delete initWalk.id;
+    setWalkEvent({
+      ...initWalk,
+      walkEnds: getDate(30),
+      latitude: jiggle(initWalk.latitude),
+      longitude: jiggle(initWalk.longitude),
+    });
+  }, [initWalk])
 
     const handleFormChange = e => {
         if (e.target.id === 'walktime') {
-        // const walkEnds = getDate(e.target.value);
-        // setWalkEvent({
-        //     ...walkEvent,
-        //     walkEnds,
-        // });
+        const walkEnds = getDate(e.target.value);
+        setWalkEvent({
+            ...walkEvent,
+            walkEnds,
+        });
         console.log(e);
         } else if (e.target.id === 'walkname') {
-        // setWalkEvent({
-        //     ...walkEvent,
-        //     name: e.target.value,
-        // });
-        console.log(e);
+        setWalkEvent({
+            ...walkEvent,
+            name: e.target.value,
+        });
         }
     };
-
+    const handleWalkCreate = () => {
+      dispatch(toggleCreateWalkModal({}));
+      dispatch(setWalk(walkEvent));
+    };
+    const handleCancelWalkCreate = () => {
+      dispatch(toggleCreateWalkModal({}));
+      setWalkEvent({});
+    };
     const handleModalToggle = () => {
-      dispatch(toggleCreateWalkModal());
+      dispatch(toggleCreateWalkModal({}));
     }
-
     return (
       <Modal show={modalOpen} onHide={handleModalToggle}>
         <Modal.Header>Create Walk</Modal.Header>
@@ -47,6 +66,7 @@ export const CreateWalkModal = ({ handleCancelWalkCreate, handleWalkCreate}) => 
               id="walkname"
               type="text"
               placeholder="Where you going?"
+              defaultValue={walkEvent['name']}
             />
             <label htmlFor='walktime'>Walk duration</label>
             <Form.Control id="walktime" as="select" defaultValue={30}>
@@ -70,8 +90,14 @@ export const CreateWalkModal = ({ handleCancelWalkCreate, handleWalkCreate}) => 
     )
   }
 
+const getDate = timeAdd =>
+  moment(new Date())
+    .add(timeAdd, 'm')
+    .format('X');
 
-// const getDate = timeAdd =>
-//   moment(new Date())
-//     .add(timeAdd, 'm')
-//     .format('X');
+const jiggle = num => {
+  const neg = Math.random() > 0.5 ? -1 : 1;
+  const jig = (Math.round(Math.random() * 10)* 0.000001 * neg)
+  console.log(num, jig, Number(parseFloat(num) + jig))
+  return Number(parseFloat(num) + jig)
+}

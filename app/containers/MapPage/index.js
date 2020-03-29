@@ -5,6 +5,7 @@
  */
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import FindMeButton from '../../components/FindMeButton';
 import ToggleButton from 'react-bootstrap/ToggleButton';
@@ -18,12 +19,12 @@ import { useInjectSaga } from 'utils/injectSaga';
 import { useInjectReducer } from 'utils/injectReducer';
 import reducer from './reducer';
 import ReactMapGL, { Marker, Source, Layer } from 'react-map-gl';
-import { setWalk, fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks, unsubscribeToWalks, subscribeToWalks } from './actions';
+import { fetchWalks, deleteWalk, fetchFollowedWalks, fetchAllWalks, unsubscribeToWalks, subscribeToWalks, setListVisible } from './actions';
 import AddFollowers from '../AddFollowers';
 import PreviousWalks from '../PreviousWalks';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import saga from './saga';
-import { makeSelectWalkList, makeSelectOtherWalkList } from './selectors';
+import { makeSelectWalkList, makeSelectOtherWalkList, makeSelectLatLng } from './selectors';
 import { makeSelectCurrentUser } from '../App/selectors';
 import { toggleCreateWalkModal } from '../CreateWalk/actions';
 import * as Layers from './layers';
@@ -35,10 +36,10 @@ export default function MapPage() {
   const currUser = useSelector(makeSelectCurrentUser());
   const walkList = useSelector(makeSelectWalkList());
   const otherWalkList = useSelector(makeSelectOtherWalkList());
+  const relocateLatLng = useSelector(makeSelectLatLng());
   const [latitude, setLat] = React.useState(37.7577);
   const [longitude, setLong] = React.useState(-122.4376);
   const [positionLoad, setPositionLoad] = React.useState(false);
-  const [walkEvent, setWalkEvent] = React.useState();
   const [otherWalksToggle, setOtherWalksToggle] = React.useState('Only Followed');
   const [currLocationMark, setCurrLocationMark] = React.useState([1, 2]);
   const [viewport, setViewport] = React.useState({
@@ -54,6 +55,12 @@ export default function MapPage() {
       dispatch(unsubscribeToWalks());
     }
   }, [currUser.id]);
+  React.useEffect(() => {
+    if (relocateLatLng.length == 2) {
+      setLat(relocateLatLng[0]);
+      setLong(relocateLatLng[1]);
+    }
+  }, [relocateLatLng])
   let _sourceRef = React.createRef();
 
   const handleSetCurrentLocation = () => {
@@ -65,7 +72,6 @@ export default function MapPage() {
       dispatch(fetchFollowedWalks());
       dispatch(subscribeToWalks());
       setCurrLocationMark([x.coords.latitude, x.coords.longitude]);
-      console.log('LOCATION', latitude, longitude);
       setLat(x.coords.latitude);
       setLong(x.coords.longitude);
       setViewport({ ...viewport, latitude, longitude });
@@ -82,7 +88,8 @@ export default function MapPage() {
   };
 
   const handleMapClick = clickE => {
-    if (clickE.features[0]) {
+    if (clickE.features[0]) { 
+      // zoom map on cluster
       const feature = clickE.features[0];
       const clusterId = feature.properties.cluster_id;
   
@@ -102,21 +109,15 @@ export default function MapPage() {
         });
       });
     } else {
-      dispatch(toggleCreateWalkModal());
-      setWalkEvent({
-        walkEnds: getDate(30),
-        latitude: `${clickE.lngLat[1]}`,
-        longitude: `${clickE.lngLat[0]}`,
-      });
+      // create new walk
+      console.log(clickE);
+      dispatch(toggleCreateWalkModal(
+        {
+          latitude: `${clickE.lngLat[1]}`,
+          longitude: `${clickE.lngLat[0]}`,
+        },
+      ));
     }
-  };
-  const handleWalkCreate = () => {
-    dispatch(toggleCreateWalkModal());
-    dispatch(setWalk(walkEvent));
-  };
-  const handleCancelWalkCreate = () => {
-    dispatch(toggleCreateWalkModal());
-    setWalkEvent();
   };
   const handleDeleteWalk = walk => () => {
     dispatch(deleteWalk(walk));
@@ -128,6 +129,9 @@ export default function MapPage() {
     } else if (e.target.value === 'Only Followed') {
       dispatch(fetchFollowedWalks());
     }
+  }
+  const handlePreviewToggle = () => {
+    dispatch(setListVisible())
   }
 
   return (
@@ -155,12 +159,13 @@ export default function MapPage() {
             handleDeleteWalk
           }}
         />
+        <ReturnFromPreview {...{handlePreviewToggle}} />
         <CreateWalkModal
-          {...{
-            // handleFormChange,
-            handleCancelWalkCreate,
-            handleWalkCreate,
-          }}
+          // {...{
+          //   // handleFormChange,
+          //   handleCancelWalkCreate,
+          //   handleWalkCreate,
+          // }}
         />
       </div>
       <PreviousWalks />
@@ -256,6 +261,15 @@ const HeaderButtons = ({handleSetCurrentLocation, positionLoad, otherWalksToggle
     </div>
   )
 }
+
+const ReturnFromPreview = ({handlePreviewToggle}) => {
+  return (
+    <div style={{ width: '100vw', position: 'fixed', bottom: 0, height: 100, zIndex: -1, backgroundColor: 'white' }}>
+      <Button onClick={handlePreviewToggle}style={{ margin: 30 }} >Return to Preview</Button>
+    </div>
+  )
+}
+
 
 const getDate = timeAdd =>
   moment(new Date())
