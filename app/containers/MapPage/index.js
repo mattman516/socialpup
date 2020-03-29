@@ -11,7 +11,6 @@ import FindMeButton from '../../components/FindMeButton';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import moment from 'moment';
 import { FaMapMarker } from 'react-icons/fa';
 import { MdGpsFixed } from 'react-icons/md';
 import { CreateWalkModal } from '../CreateWalk';
@@ -160,13 +159,7 @@ export default function MapPage() {
           }}
         />
         <ReturnFromPreview {...{handlePreviewToggle}} />
-        <CreateWalkModal
-          // {...{
-          //   // handleFormChange,
-          //   handleCancelWalkCreate,
-          //   handleWalkCreate,
-          // }}
-        />
+        <CreateWalkModal />
       </div>
       <PreviousWalks />
     </React.Fragment>
@@ -269,12 +262,6 @@ const ReturnFromPreview = ({handlePreviewToggle}) => {
     </div>
   )
 }
-
-
-const getDate = timeAdd =>
-  moment(new Date())
-    .add(timeAdd, 'm')
-    .format('X');
 
 const convertToGeoJSON = (walkList) => {
   const features = walkList.map(walk => ({

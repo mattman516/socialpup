@@ -5,7 +5,7 @@ import { toggleCreateWalkModal } from '../CreateWalk/actions';
 import { FaUndo, FaTrash, FaSearch } from 'react-icons/fa';
 import moment from 'moment';
 import IconButton from '../../components/IconButton'
-import { setLatLng, setListVisible } from '../MapPage/actions';
+import { setLatLng, setListVisible, deleteWalk } from '../MapPage/actions';
 
 export default function AddFollowers() {
   const dispatch = useDispatch();
@@ -19,13 +19,11 @@ export default function AddFollowers() {
     dispatch(setLatLng([walk.latitude, walk.longitude]))
   }
   const handleDeleteWalk = (walk) => () => {
-    // dispatch(setLatLng([walk.latitude, walk.longitude]))
+    dispatch(deleteWalk(walk));
   }
   const handlePreviewWalk = (walk) => () => {
-    console.log('click');
     dispatch(setListVisible());
     handleWalkClick(walk)();
-    // dispatch(setLatLng([walk.latitude, walk.longitude]));
   }
 
   return (
