@@ -1,4 +1,5 @@
-type Walk @model
+type Walk
+  @model (subscriptions: { level: public })
   @key(name: "endTime", fields: ["owner", "walkEnds"], queryField: "ownerEndTime")
   @auth(
     rules: [
@@ -26,5 +27,6 @@ type UserInfo @model
     id: ID!
     publicity: String
     following: [ID]
+    previousWalkLookback: Int
     owner: String
   }

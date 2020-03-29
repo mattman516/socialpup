@@ -2,7 +2,7 @@ import { put, select, takeLatest } from 'redux-saga/effects';
 import { API, graphqlOperation } from 'aws-amplify';
 import { makeSelectAuthState, makeSelectCurrentUser } from '../App/selectors';
 import { listUserInfos } from '../../../src/graphql/queries';
-import { FETCH_USER_LIST, ADD_FOLLOWER } from './constants';
+import { FETCH_USER_LIST, ADD_FOLLOWER, UPDATE_LOOKBACK } from './constants';
 import { setUserList } from './actions';
 import { updateUserInfo } from '../../../src/graphql/mutations';
 
@@ -32,8 +32,20 @@ export function* processAddFollower(action) {
   );
 }
 
+export function* processUpdateLookback(action) {
+  console.log('processUpdateLookback', action);
+  const currentUser = yield select(makeSelectCurrentUser());
+  const value = action.data === 'all' ? -1 : action.data;
+  currentUser.previousWalkLookback = value;
+  console.log(currentUser);
+  yield API.graphql(
+    graphqlOperation(updateUserInfo, { input: currentUser }),
+  );
+}
+
 function* followersSaga() {
   yield takeLatest(FETCH_USER_LIST, processAllUserFetch);
   yield takeLatest(ADD_FOLLOWER, processAddFollower);
+  yield takeLatest(UPDATE_LOOKBACK, processUpdateLookback);
 }
 export default followersSaga;
