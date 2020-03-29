@@ -33,14 +33,9 @@ const ProppedRoute = ({ render: C, props: childProps, ...rest }) => (
 );
 
 const AuthComponent = props => {
-  const [authState, setAuthState] = React.useState();
-  const [redirect, setRedirect] = React.useState();
   const handleStateChange = (state, user) => {
     console.log('STATE CHANGE', state, user);
     if (state === 'signedIn') {
-      const params = queryString.parse(props.location.search);
-      setRedirect(params.redirect);
-      setAuthState(state);
       props.onUserSignIn(user);
       props.onUserSignUp(user);
     } else if (state === 'signIn') {
@@ -48,7 +43,7 @@ const AuthComponent = props => {
     }
   };
   return (
-    <div>
+    <div  style={{ zIndex: 5, position: 'fixed', top: 0, width: '100vw'  }}>
       <Authenticator onStateChange={handleStateChange} />
     </div>
   );
@@ -71,7 +66,6 @@ const App = () => {
   const dispatch = useDispatch();
 
   const handleUserSignIn = user => {
-    console.log('SIGNIN');
     dispatch(setLogin(user));
   };
 
@@ -79,7 +73,6 @@ const App = () => {
     dispatch(setLogout());
   };
   const handleUserSignUp = (user) => {
-    console.log('HANDLEUSERSIGNUP', user);
     dispatch(createUser(user));
   };
 
@@ -91,11 +84,10 @@ const App = () => {
   };
 
   return (
-    <div className="App">
+    <div>
       <Helmet>
         <title>Social Pups</title>
       </Helmet>
-      <br />
       <Routes childProps={childProps} />
     </div>
   );

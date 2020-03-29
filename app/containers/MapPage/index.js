@@ -23,7 +23,7 @@ import AddFollowers from '../AddFollowers';
 import PreviousWalks from '../PreviousWalks';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import saga from './saga';
-import { makeSelectWalkList, makeSelectOtherWalkList, makeSelectLatLng } from './selectors';
+import { makeSelectWalkList, makeSelectOtherWalkList, makeSelectLatLng, makeSelectListVisible } from './selectors';
 import { makeSelectCurrentUser } from '../App/selectors';
 import { toggleCreateWalkModal } from '../CreateWalk/actions';
 import * as Layers from './layers';
@@ -36,6 +36,7 @@ export default function MapPage() {
   const walkList = useSelector(makeSelectWalkList());
   const otherWalkList = useSelector(makeSelectOtherWalkList());
   const relocateLatLng = useSelector(makeSelectLatLng());
+  const listVisible = useSelector(makeSelectListVisible());
   const [latitude, setLat] = React.useState(37.7577);
   const [longitude, setLong] = React.useState(-122.4376);
   const [positionLoad, setPositionLoad] = React.useState(false);
@@ -108,8 +109,6 @@ export default function MapPage() {
         });
       });
     } else {
-      // create new walk
-      console.log(clickE);
       dispatch(toggleCreateWalkModal(
         {
           latitude: `${clickE.lngLat[1]}`,
@@ -135,7 +134,7 @@ export default function MapPage() {
 
   return (
     <React.Fragment>
-      <div style={{ width: '100%', position: 'fixed', top: 100 }}>
+      <div style={{ width: '100%', position: 'fixed', top: 67, paddingTop: 0, backgroundColor: 'white' }}>
         <HeaderButtons
           {...{
             handleSetCurrentLocation,
@@ -158,7 +157,7 @@ export default function MapPage() {
             handleDeleteWalk
           }}
         />
-        <ReturnFromPreview {...{handlePreviewToggle}} />
+        <ReturnFromPreview {...{handlePreviewToggle, listVisible}} />
         <CreateWalkModal />
       </div>
       <PreviousWalks />
@@ -218,7 +217,9 @@ const HeaderButtons = ({handleSetCurrentLocation, positionLoad, otherWalksToggle
       style={{
         display: 'flex',
         flexDirection: 'column',
-        margin: 25,
+        backgroundColor: 'white',
+        margin: 15,
+        marginTop: 5,
       }}
     >
       <div
@@ -255,9 +256,10 @@ const HeaderButtons = ({handleSetCurrentLocation, positionLoad, otherWalksToggle
   )
 }
 
-const ReturnFromPreview = ({handlePreviewToggle}) => {
+const ReturnFromPreview = ({handlePreviewToggle, listVisible}) => {
+  const zIndex = listVisible ? -1 : 2;
   return (
-    <div style={{ width: '100vw', position: 'fixed', bottom: 0, height: 100, zIndex: 2, backgroundColor: 'white' }}>
+    <div style={{ zIndex, width: '100vw', position: 'fixed', bottom: 0, height: 100, backgroundColor: 'white' }}>
       <Button onClick={handlePreviewToggle}style={{ margin: 30 }} >Return to Preview</Button>
     </div>
   )
