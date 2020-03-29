@@ -264,7 +264,7 @@ const HeaderButtons = ({handleSetCurrentLocation, positionLoad, otherWalksToggle
 
 const ReturnFromPreview = ({handlePreviewToggle}) => {
   return (
-    <div style={{ width: '100vw', position: 'fixed', bottom: 0, height: 100, zIndex: -1, backgroundColor: 'white' }}>
+    <div style={{ width: '100vw', position: 'fixed', bottom: 0, height: 100, zIndex: 2, backgroundColor: 'white' }}>
       <Button onClick={handlePreviewToggle}style={{ margin: 30 }} >Return to Preview</Button>
     </div>
   )
