@@ -260,7 +260,7 @@ const ReturnFromPreview = ({handlePreviewToggle, listVisible}) => {
   const zIndex = listVisible ? -1 : 2;
   return (
     <div style={{ zIndex, width: '100vw', position: 'fixed', bottom: 0, height: 100, backgroundColor: 'white' }}>
-      <Button onClick={handlePreviewToggle}style={{ margin: 30 }} >Return to Preview</Button>
+      <Button onClick={handlePreviewToggle}style={{ margin: 30 }} >Return to List</Button>
     </div>
   )
 }

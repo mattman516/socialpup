@@ -32,8 +32,7 @@ export function* processSaveWalk(action) {
 
   if (authState.authUserData.attributes.sub) {
     walk = {
-      name: 'test123',
-      description: 'test123',
+      name: 'Default New Walk',
       ...action.data,
     };
 

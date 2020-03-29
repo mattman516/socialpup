@@ -70,7 +70,7 @@ const Wrapper = props => {
         position: 'absolute',
         padding: 20,
         zIndex: props.listVisible ? 3 : -1,
-        top: 'calc(100vh - 100px)',
+        top: 'calc(100vh - 150px)',
         backgroundColor: 'white',
         paddingTop: 20,
         width: '100vw',
